@@ -1,6 +1,6 @@
-# Day 1 — Scope and data inventory
+# Data collection and data inventory
 
-## Day 1 status: complete
+## Inventory status: complete
 
 The BTS data has been downloaded and checked. The project scope is now narrow enough for a one-week build.
 
@@ -25,13 +25,13 @@ Primary source: [BTS Reporting Carrier On-Time Performance](https://transtats.bt
 
 | Month | Extracted CSV | Rows | File size |
 |---|---|---:|---:|
-| January 2026 | `T_ONTIME_REPORTING_20261027_145650/T_ONTIME_REPORTING.csv` | 544,003 | 60,284,718 bytes |
-| February 2026 | `T_ONTIME_REPORTING_20261027_145800/T_ONTIME_REPORTING.csv` | 515,037 | 57,371,990 bytes |
-| March 2026 | `T_ONTIME_REPORTING_20261027_150025/T_ONTIME_REPORTING.csv` | 612,102 | 68,192,579 bytes |
-| April 2026 | `T_ONTIME_REPORTING_20261029_080530/T_ONTIME_REPORTING.csv` | 597,919 | 45,195,316 bytes |
+| January 2026 | `../data/raw/T_ONTIME_REPORTING_20261027_145650/T_ONTIME_REPORTING.csv` | 544,003 | 60,284,718 bytes |
+| February 2026 | `../data/raw/T_ONTIME_REPORTING_20261027_145800/T_ONTIME_REPORTING.csv` | 515,037 | 57,371,990 bytes |
+| March 2026 | `../data/raw/T_ONTIME_REPORTING_20261027_150025/T_ONTIME_REPORTING.csv` | 612,102 | 68,192,579 bytes |
+| April 2026 | `../data/raw/T_ONTIME_REPORTING_20261029_080530/T_ONTIME_REPORTING.csv` | 597,919 | 45,195,316 bytes |
 | **Total** | **4 monthly CSV files** | **2,269,061** | **231,044,603 bytes** |
 
-Each month also has its original BTS ZIP file in the project root. Keep the ZIP files and extracted CSV files unchanged as raw source data; perform filtering and cleaning on working copies.
+Each month also has its original BTS ZIP file under `../data/raw/archives/`. Keep the ZIP files and extracted CSV files unchanged as raw source data; perform filtering and cleaning on working copies.
 
 ## Verified data quality and suitability
 
@@ -50,11 +50,11 @@ April contains the essential fields for date, carrier, tail, flight number, rout
 
 ## Timestamp and time-zone handling
 
-BTS scheduled and actual clock times are local to each airport, so raw HHMM values cannot be sorted across airports directly. Day 2 used the `airportsdata` 20260905 package to map the first 106 IATA airport codes in WN's sample to IANA timezone names, then added STS for April using the airport's published local-time information. The frozen 107-airport mapping is in `data/reference/airport_timezones.csv`; its provenance is documented in `data/reference/README.md`.
+BTS scheduled and actual clock times are local to each airport, so raw HHMM values cannot be sorted across airports directly. The preprocessing workflow used the `airportsdata` 20260905 package to map the first 106 IATA airport codes in WN's sample to IANA timezone names, then added STS for April using the airport's published local-time information. The frozen 107-airport mapping is in `../data/reference/airport_timezones.csv`; its provenance is documented in `technical-documentation.md`.
 
-The preprocessing script handles `2400` as midnight on the following date, rolls arrivals to the earliest plausible local date after departure, and shifts nonexistent spring-forward clock times forward. It consistently chooses the first occurrence for an ambiguous repeated clock time. Inspect the generated sample chains in the Day 2 report when changing or extending this time logic.
+The preprocessing notebook handles `2400` as midnight on the following date, rolls arrivals to the earliest plausible local date after departure, and shifts nonexistent spring-forward clock times forward. It consistently chooses the first occurrence for an ambiguous repeated clock time. Inspect the generated sample chains in `../reports/analysis/day2_sample_chains.md` when changing or extending this time logic.
 
-## Day 1 decisions and deliverables
+## Scope decisions and deliverables
 
 - **Decision:** use WN as the pilot carrier. It has the largest record count in this sample and enough repeated aircraft records for sequence analysis.
 - **Decision:** extend the study period to four months and retain all WN airports; filter other carriers after loading the data.
@@ -62,7 +62,7 @@ The preprocessing script handles `2400` as midnight on the following date, rolls
 - **Completed:** checked file coverage, row counts, schema consistency, missing tail numbers, cancellations, diversions, exact duplicates, and WN tail-number coverage.
 - **Completed:** documented a time-zone conversion approach and fallback.
 
-## Day 2 starting checklist
+## Preprocessing handoff checklist
 
 1. Load the four CSVs and filter to `OP_UNIQUE_CARRIER == "WN"`.
 2. Parse `YEAR`, `MONTH`, and `DAY_OF_MONTH` into the local flight date; parse HHMM clock fields carefully.
@@ -70,4 +70,3 @@ The preprocessing script handles `2400` as midnight on the following date, rolls
 4. Exclude cancelled flights from the operated-flight sequence; retain a separate cancellation summary.
 5. Sort by tail number and UTC event time, create previous-flight/next-flight pairs, and manually inspect at least 10 chains.
 6. Derive `DEP_DEL15` and turnaround slack; save a cleaned pair-level file separately from the raw data.
-

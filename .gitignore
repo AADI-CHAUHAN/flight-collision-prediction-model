@@ -23,3 +23,8 @@ T_ONTIME_REPORTING_*/
 
 # Backup ZIP files
 T_ONTIME_REPORTING_*.zip
+
+# Microsoft Office temporary files
+~$*.docx
+~$*.xlsx
+~$*.pptx

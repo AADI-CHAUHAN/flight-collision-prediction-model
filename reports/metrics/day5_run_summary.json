@@ -48,11 +48,11 @@
     }
   ],
   "outputs": [
-    "reports/day5_scenario_impact_summary.csv",
-    "reports/day5_demo_chain_scenarios.csv",
-    "reports/day5_figures/day5_scenario_summary.png",
-    "reports/day5_figures/day5_demo_chain_timeline.png",
-    "reports/day5_run_summary.json",
-    "reports/day5_scenario_notes.md"
+    "reports/metrics/day5_scenario_impact_summary.csv",
+    "reports/metrics/day5_demo_chain_scenarios.csv",
+    "reports/figures/day5_scenario_summary.png",
+    "reports/figures/day5_demo_chain_timeline.png",
+    "reports/metrics/day5_run_summary.json",
+    "reports/analysis/day5_scenario_notes.md"
   ]
 }

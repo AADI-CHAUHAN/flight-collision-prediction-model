@@ -74,14 +74,18 @@ These numbers do **not** mean real schedule changes would prevent those delays. 
 
 ## Reproducibility and project files
 
-Run the notebooks from top to bottom in this order:
+Read the notebooks from top to bottom in this order:
 
-1. `DAY2_DATA_PREPARATION.ipynb` — raw profiling, timezone conversion, flight-pair construction.
-2. `DAY3_EXPLORATION_AND_BASELINES.ipynb` — EDA, model selection, and April evaluation.
-3. `DAY4_MODEL_REVIEW_AND_ERROR_ANALYSIS.ipynb` — calibration, feature importance, and error review.
-4. `DAY5_SCENARIO_DEMO.ipynb` — turnaround-slack scenarios and chain timeline.
+1. `../../notebooks/01_data_collection_and_understanding.ipynb` — project scope and source inventory.
+2. `../../notebooks/02_data_preprocessing.ipynb` — raw profiling, time-zone conversion, and flight-pair construction.
+3. `../../notebooks/03_exploratory_data_analysis.ipynb` — delay and propagation analysis.
+4. `../../notebooks/04_baseline_model_development.ipynb` — majority and logistic-regression baselines.
+5. `../../notebooks/05_model_training_and_optimization.ipynb` — feature/model selection and April holdout evaluation.
+6. `../../notebooks/06_model_evaluation_and_error_analysis.ipynb` — calibration, feature importance, and error review.
+7. `../../notebooks/07_scenario_simulation_and_demo.ipynb` — turnaround-slack scenarios and chain timeline.
+8. `../../notebooks/08_interactive_dashboard.ipynb` — optional widget-based presentation.
 
-Install dependencies from `requirements.txt`. The outputs, figures, metrics, and error examples are saved under `reports/`.
+Install dependencies from `../../requirements.txt`. Metrics are saved under `../metrics/`, figures under `../figures/`, and written analysis under `./`.
 
 ## References
 

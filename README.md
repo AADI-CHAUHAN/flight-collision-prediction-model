@@ -1,50 +1,118 @@
-# Flight Delay Domino Effect
+# Flight Collision Prediction Model
 
-An academic prototype that examines whether an aircraft's previous arrival delay and scheduled turnaround slack help predict if its next Southwest flight departs at least 15 minutes late.
+## Project overview
 
-## Open the frontend
+This project studies aircraft delay propagation using historical airline on-time performance records. Its central question is whether an aircraft's previous arrival delay and the time scheduled for its turnaround help predict whether its next flight will depart at least 15 minutes late.
 
-Open `dashboard.html` in a browser. Keep `styles.css`, `app.js`, and `dashboard-data.js` beside it. The dashboard does not need a server or Python kernel. Select a flight leg to inspect its route, previous-arrival delay, turnaround, model prediction, actual departure, and stored turnaround what-if outputs.
+The project links consecutive flights by aircraft tail number, develops and evaluates chronological machine-learning baselines and candidate models, examines prediction errors and calibration, and demonstrates simplified turnaround-slack scenarios in an interactive dashboard.
 
-## Run the analysis in VS Code
+Despite the repository name, this is a flight-delay analysis prototype; it does not predict physical aircraft collisions, identify new in-air routes, or provide operational dispatch recommendations.
 
-Open this folder in VS Code, select a Python kernel, and run the notebooks in order:
+## Objectives
 
-1. `DAY2_DATA_PREPARATION.ipynb`
-2. `DAY3_EXPLORATION_AND_BASELINES.ipynb`
-3. `DAY4_MODEL_REVIEW_AND_ERROR_ANALYSIS.ipynb`
-4. `DAY5_SCENARIO_DEMO.ipynb`
+- Prepare historical flight records and form time-consistent aircraft flight sequences.
+- Explore how inbound delay and scheduled turnaround slack relate to the next departure delay.
+- Compare baseline classifiers and select a model without using the final April holdout for tuning.
+- Report classification metrics, calibration, feature importance, and error patterns.
+- Demonstrate stored model results and feature-only turnaround scenarios in a local dashboard.
 
-The downloaded monthly BTS data folders must remain in the project folder for Day 2. Install dependencies in the selected environment with:
+## Data
+
+The primary source is the [BTS Reporting Carrier On-Time Performance dataset](https://transtats.bts.gov/TableInfo.asp?QO_fu146_anzr=b0-gvzr&V0s1_b0yB=D&gnoyr_VQ=FGJ), which contains U.S. domestic flight records.
+
+The inspected local sample covers January-April 2026. It includes four monthly CSV extracts (2,269,061 records across carriers) and their source ZIP archives. Southwest (`WN`) accounts for 444,897 flight records; preprocessing produced 423,660 linked aircraft-flight pairs across 808 tails. See [the data inventory](documentation/data-inventory.md) for field coverage, counts, quality checks, and time-zone handling.
+
+- `data/raw/` — locally preserved, extracted BTS CSVs.
+- `data/raw/archives/` — locally preserved source ZIP archives.
+- `data/processed/` — generated WN flight-level and aircraft-pair CSVs for January-March and January-April.
+- `data/reference/` — airport time-zone mapping used for timestamp normalization.
+
+Large raw and processed datasets are excluded from Git. A fresh clone therefore needs the BTS source CSVs placed in the matching `data/raw/T_ONTIME_REPORTING_<timestamp>/` folders before running preprocessing. The ZIP files may be kept under `data/raw/archives/`; the notebook reads the extracted CSVs.
+
+## Workflow
+
+The notebooks follow the lifecycle order below. Notebook 01 documents scope and data understanding; notebook 08 is an optional widget-based presentation.
+
+1. [Data collection and understanding](notebooks/01_data_collection_and_understanding.ipynb) — study scope, source inventory, data quality, and preprocessing decisions.
+2. [Data preprocessing](notebooks/02_data_preprocessing.ipynb) — profile BTS data, normalize airport-local timestamps, link aircraft flights, and export processed data.
+3. [Exploratory data analysis](notebooks/03_exploratory_data_analysis.ipynb) — inspect delay distributions, delay rates, and propagation patterns.
+4. [Baseline model development](notebooks/04_baseline_model_development.ipynb) — compare majority-class and balanced logistic-regression baselines.
+5. [Model training and optimization](notebooks/05_model_training_and_optimization.ipynb) — compare engineered candidates, select a threshold on February validation, and evaluate the locked workflow on April.
+6. [Model evaluation and error analysis](notebooks/06_model_evaluation_and_error_analysis.ipynb) — review calibration, feature importance, confusion matrices, and errors.
+7. [Scenario simulation and demo](notebooks/07_scenario_simulation_and_demo.ipynb) — compare baseline, +15-minute, and +30-minute slack scenarios.
+8. [Interactive dashboard notebook](notebooks/08_interactive_dashboard.ipynb) — optional VS Code/Jupyter widget version of the demo.
+
+Run notebooks 02 through 07 in order after installing the dependencies. Notebooks 04 and 05 are separate so each modeling stage can be inspected and rerun independently; the required shared setup is included in each.
+
+## Model development and evaluation
+
+The prediction target is `DEP_DEL15`: whether the current flight's departure delay is at least 15 minutes. The primary predictors include the previous flight's arrival delay, scheduled turnaround slack, route, departure hour, weekday, and month. Tail number is used to form sequences, not as a model feature.
+
+The notebook workflow uses a chronological design: January for initial fitting, February for model/threshold selection, March as an intermediate comparison, and April as the final holdout. Preprocessing, encoders, and imputers are fitted within model pipelines on training data.
+
+The saved April evaluation contains 114,084 linked flight pairs with a 25.58% positive rate. The selected engineered Random Forest achieved 85.26% accuracy, 69.48% precision, 75.54% recall, 72.39% F1, and 0.887 ROC-AUC. Its probability calibration is weak; dashboard scores are relative model scores, not precise probabilities. Saved results are in `reports/metrics/`, figures in `reports/figures/`, and written analysis in `reports/analysis/`.
+
+The +15/+30-minute scenarios change scheduled turnaround slack as a feature while holding other observed inputs fixed. They are illustrative feature perturbations, not causal estimates, operational recommendations, or validated schedule-recovery plans.
+
+## Technologies
+
+- Python notebooks with pandas, NumPy, scikit-learn, and Matplotlib.
+- ipywidgets for the optional notebook-based dashboard demo.
+- A standalone HTML, CSS, and JavaScript dashboard that displays locally embedded results.
+- Python's standard-library `zoneinfo` for airport time-zone conversion.
+
+## Dashboard
+
+Open [dashboard/dashboard.html](dashboard/dashboard.html) directly in a browser. Keep `dashboard.html`, `styles.css`, `app.js`, and `dashboard-data.js` together in `dashboard/`. The dashboard uses its local, embedded saved analysis data and does not require a Python server or live data connection.
+
+## Setup
+
+Use Python 3.10 or later and install the listed dependencies:
 
 ```powershell
 python -m pip install -r requirements.txt
 ```
 
-`DAY7_INTERACTIVE_DASHBOARD.ipynb` is an optional notebook version of the dashboard controls. Run its cells from top to bottom after installing the dependencies.
+In VS Code, select the environment as the notebook kernel. Run notebook 02 after placing the extracted monthly BTS CSVs under `data/raw/`; then run notebooks 03-07 in order. Notebook 08 additionally uses `ipywidgets`. The standalone web dashboard can be opened without installing Python dependencies.
 
-## Teacher demo sequence
+## Repository structure
 
-1. Start with `dashboard.html` and explain the project question.
-2. Select a leg and compare its predicted delay category with the actual delay. Point out the inbound arrival and scheduled turnaround that the model uses.
-3. Explain the April check in plain language: the model caught about three quarters of flights delayed by 15 minutes or more.
-4. Open `DAY6_REPORT_DRAFT.md` for the dataset, method, limitations, and references.
+```text
+data/
+  raw/
+    archives/
+  processed/
+  reference/
+notebooks/
+  01_data_collection_and_understanding.ipynb
+  02_data_preprocessing.ipynb
+  03_exploratory_data_analysis.ipynb
+  04_baseline_model_development.ipynb
+  05_model_training_and_optimization.ipynb
+  06_model_evaluation_and_error_analysis.ipynb
+  07_scenario_simulation_and_demo.ipynb
+  08_interactive_dashboard.ipynb
+dashboard/
+src/
+  data/
+  features/
+  models/
+  visualization/
+reports/
+  figures/
+  metrics/
+  analysis/
+documentation/
+requirements.txt
+README.md
+```
 
-## Main results
+No reusable Python source files existed in the original project, so the analysis remains in notebooks rather than being duplicated into placeholder modules. The `src/` subfolders are reserved for later extraction of validated reusable code. The independent [wildlife strike project](wildlife_strike_project/) remains separate and unchanged.
 
-The selected engineered Random Forest was fitted on January-March flight pairs and evaluated on 114,084 April pairs. It achieved 85.3% accuracy, 75.5% recall, 72.4% F1, and 0.887 ROC-AUC. The model's probability calibration is weak, so scores in the frontend are relative scores rather than exact probabilities.
+## Documentation
 
-The scenario controls use stored April model outputs after hypothetically adding 0, 15, or 30 minutes to scheduled turnaround slack. This changes one input while holding other conditions fixed. It is an illustration, not a causal estimate, a real schedule recovery recommendation, or an operationally feasible plan.
-
-## Files
-
-- `dashboard.html`, `styles.css`, `app.js`, `dashboard-data.js` — interactive flight-operations frontend and its locally embedded saved analysis data
-- `DAY2_DATA_PREPARATION.ipynb` — data preparation and aircraft-pair construction
-- `DAY3_EXPLORATION_AND_BASELINES.ipynb` — exploration, model selection, and April evaluation
-- `DAY4_MODEL_REVIEW_AND_ERROR_ANALYSIS.ipynb` — calibration and error analysis
-- `DAY5_SCENARIO_DEMO.ipynb` — turnaround-slack scenarios and example chain
-- `DAY6_REPORT_DRAFT.md` — report draft with sources and reproducibility steps
-- `PROJECT_WORKFLOW.md` — week plan and completed work
-- `reports/` — saved metrics, scenario results, and figures
-
-Data source: [BTS Reporting Carrier On-Time Performance](https://transtats.bts.gov/TableInfo.asp?QO_fu146_anzr=b0-gvzr&V0s1_b0yB=D&gnoyr_VQ=FGJ).
+- [Project workflow](documentation/project-workflow.md)
+- [Data inventory](documentation/data-inventory.md)
+- [Project guidelines](documentation/project-guidelines.md)
+- [Technical documentation](documentation/technical-documentation.md)
+- [Project report draft](reports/analysis/project_report_draft.md)

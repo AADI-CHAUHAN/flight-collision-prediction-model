@@ -1,4 +1,4 @@
-# Day 5 - Scenario demo notes
+# Turnaround scenario notes
 
 Selected illustrative aircraft tail: `N8804L`. The model threshold remains `0.4988`, selected on February validation.
 

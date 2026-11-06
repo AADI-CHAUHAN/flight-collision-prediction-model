@@ -33,9 +33,9 @@
     "PR_AUC_AVERAGE_PRECISION": 0.8272057392979416
   },
   "outputs": [
-    "reports/day3_model_validation_comparison.csv",
-    "reports/day3_model_improvement_march_metrics.csv",
-    "reports/day3_selected_model_march_confusion_matrix.csv",
-    "reports/day3_model_improvement_summary.json"
+    "reports/metrics/day3_model_validation_comparison.csv",
+    "reports/metrics/day3_model_improvement_march_metrics.csv",
+    "reports/metrics/day3_selected_model_march_confusion_matrix.csv",
+    "reports/metrics/day3_model_improvement_summary.json"
   ]
 }

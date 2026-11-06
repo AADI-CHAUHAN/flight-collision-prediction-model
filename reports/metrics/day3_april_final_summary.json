@@ -52,8 +52,8 @@
     }
   ],
   "outputs": [
-    "reports/day3_april_final_metrics.csv",
-    "reports/day3_april_final_confusion_matrix.csv",
-    "reports/day3_april_final_summary.json"
+    "reports/metrics/day3_april_final_metrics.csv",
+    "reports/metrics/day3_april_final_confusion_matrix.csv",
+    "reports/metrics/day3_april_final_summary.json"
   ]
 }

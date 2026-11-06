@@ -1,4 +1,4 @@
-# Day 4 - Model review and error analysis
+# Model evaluation and error analysis
 
 ## Locked evaluation
 

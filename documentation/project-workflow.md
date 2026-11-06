@@ -36,7 +36,7 @@ BTS describes the table as monthly records of domestic non-stop flights. It incl
 
 ### Recommended scope
 
-- Use **Southwest Airlines (BTS carrier code WN)** across its network for **January–April 2026**. The uploaded sample contains the most flight records for WN, and keeping one carrier makes aircraft sequences easier to interpret while retaining the carrier's network preserves tail-number links across airports. See [DAY1_SCOPE_AND_DATA_INVENTORY.md](DAY1_SCOPE_AND_DATA_INVENTORY.md) for the verified counts.
+- Use **Southwest Airlines (BTS carrier code WN)** across its network for **January–April 2026**. The uploaded sample contains the most flight records for WN, and keeping one carrier makes aircraft sequences easier to interpret while retaining the carrier's network preserves tail-number links across airports. See [data inventory](data-inventory.md) for the verified counts.
 - Include all airports operated by that airline during the chosen period, then select a few interesting aircraft sequences for the demonstration.
 - Start with completed flights that have usable tail numbers. Analyze cancellations separately because cancelled flights may not have an assigned tail number or an ordinary arrival record.
 - Do not begin with all carriers or many years. Expand only if the first data slice is clean and the schedule permits.
@@ -135,69 +135,69 @@ A small Streamlit app, notebook dashboard, or static report is enough. Include:
 
 ## 9. One-week schedule
 
-### Day 1 — Confirm the data and narrow the scope
+### Data collection and scope
 
 - **Completed:** downloaded and inspected BTS data for January–April 2026.
 - **Completed:** selected Southwest (WN) for the pilot based on its high flight count and complete tail-number coverage among non-cancelled flights.
-- **Completed:** documented the dataset, selected fields, scope, target, data-quality checks, and time-zone plan in [DAY1_SCOPE_AND_DATA_INVENTORY.md](DAY1_SCOPE_AND_DATA_INVENTORY.md).
-- Deliverable: verified raw CSVs, source notes, and locked scope.
+- **Completed:** documented the dataset, selected fields, scope, target, data-quality checks, and time-zone plan in [data inventory](data-inventory.md).
+- Deliverables: [data inventory](data-inventory.md), `../notebooks/01_data_collection_and_understanding.ipynb`, verified raw CSVs, source notes, and locked scope.
 
-### Day 2 — Clean and link flight sequences
+### Data preprocessing and aircraft sequence construction
 
-- **Completed:** added reproducible preprocessing in `DAY2_DATA_PREPARATION.ipynb`, profiled the raw WN data (shape, all-column dtypes, numeric/categorical split, descriptive statistics, and missing counts/percentages), and filtered four monthly files (January-April 2026) to WN. The April file has 17 core fields while January-March have 23; optional fields absent from April are handled without imputing them as observed values.
+- **Completed:** added reproducible preprocessing in `../notebooks/02_data_preprocessing.ipynb`, profiled the raw WN data (shape, all-column dtypes, numeric/categorical split, descriptive statistics, and missing counts/percentages), and filtered four monthly files (January-April 2026) to WN. The April file has 17 core fields while January-March have 23; optional fields absent from April are handled without imputing them as observed values.
 - **Completed:** mapped all 107 WN airport codes to IANA time zones, including STS added for April, converted local times to UTC, handled `2400` and arrival date rollover, and derived the `DEP_DEL15` target.
 - **Completed:** excluded cancelled, diverted, missing-tail, and unusable-time records from the operated-aircraft sequences; retained cancellations in the flight-level output for separate analysis.
 - **Completed:** linked 423,660 adjacent-flight pairs by aircraft tail and matching destination/origin airport, after requiring plausible scheduled and actual turnaround intervals of 0–24 hours. Cancelled/diverted events with a reported departure are kept as sequence barriers so links do not jump over them.
-- **Completed:** summarized the 5,969 WN cancellations by month and cancellation code in `reports/day2_cancellation_summary.csv` for separate disruption analysis.
+- **Completed:** summarized the 5,969 WN cancellations by month and cancellation code in `../reports/metrics/day2_cancellation_summary.csv` for separate disruption analysis.
 - **Completed:** inspected ten sample chains; route handoffs and turn intervals were coherent in the inspected examples.
-- Deliverables: `DAY2_DATA_PREPARATION.ipynb`, `reports/day2_raw_dataset_profile.json`, `reports/day2_raw_column_profile.csv`, `reports/day2_raw_descriptive_statistics.csv`, `data/processed/wn_flights_2026-01_to_2026-04.csv`, `data/processed/wn_aircraft_pairs_2026-01_to_2026-04.csv`, `reports/day2_data_quality.json`, `reports/day2_cancellation_summary.csv`, and `reports/day2_sample_chains.md`.
+- Deliverables: `../notebooks/02_data_preprocessing.ipynb`, `../reports/metrics/day2_raw_dataset_profile.json`, `../reports/metrics/day2_raw_column_profile.csv`, `../reports/metrics/day2_raw_descriptive_statistics.csv`, `../data/processed/wn_flights_2026-01_to_2026-04.csv`, `../data/processed/wn_aircraft_pairs_2026-01_to_2026-04.csv`, `../reports/metrics/day2_data_quality.json`, `../reports/metrics/day2_cancellation_summary.csv`, and `../reports/analysis/day2_sample_chains.md`.
 
-### Day 3 — Explore and establish baselines
+### Exploratory analysis and model development
 
-- **Completed:** created `DAY3_EXPLORATION_AND_BASELINES.ipynb` with delay distributions and rates by scheduled hour, weekday, and origin airport, plus next-flight delay analysis by inbound arrival delay and scheduled turnaround slack.
+- **Completed:** organized the original analysis into `../notebooks/03_exploratory_data_analysis.ipynb`, `../notebooks/04_baseline_model_development.ipynb`, and `../notebooks/05_model_training_and_optimization.ipynb`. These cover delay distributions and propagation, baseline comparison, candidate selection, and the final April evaluation.
 - **Completed:** made a chronological January-February training / March comparison split. Median imputation, scaling, and one-hot encoding are inside a model pipeline fitted only on training data; current-flight actual delay and actual timestamps are excluded from predictors to prevent target leakage. April is now the fresh final holdout.
 - **Completed:** compared a training-majority baseline with balanced logistic regression using accuracy, precision, recall, F1, ROC-AUC, average precision, and a confusion matrix.
-- **Completed:** added a controlled improvement round: fit candidate models on January, selected features/model/threshold on February validation, then refit the winner on January-February. Engineered features include log delay/slack, a short-slack indicator and interaction, and cyclical departure-hour values; compared original and engineered logistic regression with a Random Forest.
+- **Completed:** retained the controlled improvement round: fit candidate models on January, selected the model and threshold on February validation, then refit the winner on January-February. Engineered features include log delay/slack, a short-slack indicator and interaction, and cyclical departure-hour values; compared original and engineered logistic regression with a Random Forest.
 - **March comparison:** the February-selected engineered Random Forest scored 0.8479 accuracy, 0.7586 precision, 0.7285 recall, 0.7433 F1, 0.8777 ROC-AUC, and 0.8272 average precision. March was already viewed during baseline analysis, so it is not the fresh final test.
 - **Fresh April final evaluation:** the selected Random Forest was refit on January-March and scored 0.8526 accuracy, 0.6948 precision, 0.7554 recall, 0.7239 F1, 0.8870 ROC-AUC, and 0.8178 average precision on April. April's 15+ minute delay rate was 25.58%. Do not tune further on April.
-- **Finding to carry into Day 4:** delay prevalence is 19.63% in January-February, 30.22% in March, and 25.58% in April; present month-specific rates and confusion matrices alongside overall metrics.
-- Deliverables: `DAY3_EXPLORATION_AND_BASELINES.ipynb`, `reports/day3_figures/`, `reports/day3_baseline_metrics.csv`, `reports/day3_logistic_confusion_matrix.csv`, `reports/day3_model_validation_comparison.csv`, `reports/day3_model_improvement_march_metrics.csv`, `reports/day3_selected_model_march_confusion_matrix.csv`, `reports/day3_model_improvement_summary.json`, `reports/day3_april_final_metrics.csv`, `reports/day3_april_final_confusion_matrix.csv`, `reports/day3_april_final_summary.json`, `reports/day3_delay_quantiles.csv`, and `reports/day3_run_summary.json`.
+- **Finding for model review:** delay prevalence is 19.63% in January-February, 30.22% in March, and 25.58% in April; present month-specific rates and confusion matrices alongside overall metrics.
+- Deliverables: `../notebooks/03_exploratory_data_analysis.ipynb`, `../notebooks/04_baseline_model_development.ipynb`, `../notebooks/05_model_training_and_optimization.ipynb`, `../reports/figures/`, `../reports/metrics/day3_baseline_metrics.csv`, `../reports/metrics/day3_logistic_confusion_matrix.csv`, `../reports/metrics/day3_model_validation_comparison.csv`, `../reports/metrics/day3_model_improvement_march_metrics.csv`, `../reports/metrics/day3_selected_model_march_confusion_matrix.csv`, `../reports/metrics/day3_model_improvement_summary.json`, `../reports/metrics/day3_april_final_metrics.csv`, `../reports/metrics/day3_april_final_confusion_matrix.csv`, `../reports/metrics/day3_april_final_summary.json`, `../reports/metrics/day3_delay_quantiles.csv`, and `../reports/metrics/day3_run_summary.json`.
 
-### Day 4 — Validate the selected model and inspect errors
+### Model evaluation and error analysis
 
-- **Completed:** created `DAY4_MODEL_REVIEW_AND_ERROR_ANALYSIS.ipynb`; reproduced the locked February-selected Random Forest and 0.4988 threshold, fit on January-March, and reviewed April without tuning on it.
+- **Completed:** created `../notebooks/06_model_evaluation_and_error_analysis.ipynb`; reproduced the locked February-selected Random Forest and 0.4988 threshold, fit on January-March, and reviewed April without tuning on it.
 - **Completed:** checked calibration on February validation and April. February ECE is 0.2027; the model's absolute risk probabilities are poorly calibrated, so present them as relative scores rather than precise risk percentages.
 - **Completed:** summarized grouped feature importance and reviewed April confusion matrix, false negatives/false positives, example aircraft chains, and error rates by inbound delay and scheduled slack.
 - **Finding:** previous-flight arrival delay and its interaction with short scheduled slack account for most of the Random Forest's grouped impurity importance. This is predictive association, not causal evidence.
-- Deliverables: `DAY4_MODEL_REVIEW_AND_ERROR_ANALYSIS.ipynb`, `reports/day4_error_analysis.md`, `reports/day4_run_summary.json`, `reports/day4_calibration_metrics.csv`, `reports/day4_calibration_bins.csv`, `reports/day4_random_forest_grouped_importance.csv`, `reports/day4_april_confusion_matrix.csv`, `reports/day4_april_error_examples.csv`, `reports/day4_april_errors_by_inbound_delay.csv`, `reports/day4_april_errors_by_slack.csv`, and `reports/day4_figures/`.
+- Deliverables: `../notebooks/06_model_evaluation_and_error_analysis.ipynb`, `../reports/analysis/day4_error_analysis.md`, `../reports/metrics/day4_run_summary.json`, `../reports/metrics/day4_calibration_metrics.csv`, `../reports/metrics/day4_calibration_bins.csv`, `../reports/metrics/day4_random_forest_grouped_importance.csv`, `../reports/metrics/day4_april_confusion_matrix.csv`, `../reports/metrics/day4_april_error_examples.csv`, `../reports/metrics/day4_april_errors_by_inbound_delay.csv`, `../reports/metrics/day4_april_errors_by_slack.csv`, and `../reports/figures/`.
 
-### Day 5 — Build the propagation and scenario demo
+### Scenario simulation and demonstration
 
-- **Completed:** created `DAY5_SCENARIO_DEMO.ipynb`, which compares the locked model and a simple residual-inbound-delay rule under baseline, +15-minute, and +30-minute scheduled-slack scenarios for April flight pairs.
+- **Completed:** created `../notebooks/07_scenario_simulation_and_demo.ipynb`, which compares the locked model and a simple residual-inbound-delay rule under baseline, +15-minute, and +30-minute scheduled-slack scenarios for April flight pairs.
 - **Completed:** added an illustrative aircraft-chain timeline showing observed arrival/departure events and hypothetical scheduled-departure shifts.
 - **Completed:** documented assumptions and limitations, including that the model scores are uncalibrated, the intervention is feature-only, and the demo does not model downstream schedules, crews, runway capacity, or causal operational effects.
 - **Scenario summary:** average relative model score changes from 0.4233 at baseline to 0.3922 with +15 minutes and 0.3586 with +30 minutes. The transparent rule flags 2.87%, 1.80%, and 1.20% of flights delayed, respectively. These are illustrative associations, not expected real-world savings.
-- Deliverables: `DAY5_SCENARIO_DEMO.ipynb`, `reports/day5_scenario_notes.md`, `reports/day5_run_summary.json`, `reports/day5_scenario_impact_summary.csv`, `reports/day5_demo_chain_scenarios.csv`, and `reports/day5_figures/`.
+- Deliverables: `../notebooks/07_scenario_simulation_and_demo.ipynb`, `../reports/analysis/day5_scenario_notes.md`, `../reports/metrics/day5_run_summary.json`, `../reports/metrics/day5_scenario_impact_summary.csv`, `../reports/metrics/day5_demo_chain_scenarios.csv`, and `../reports/figures/`.
 
-### Day 6 — Explain the evidence
+### Reporting and evidence
 
-- **Completed:** created `DAY6_REPORT_DRAFT.md` with the project question, BTS data and preparation, features, chronological evaluation design, April holdout metrics, error/calibration interpretation, scenario results, limitations, references, and notebook run order.
+- **Completed:** created `../reports/analysis/project_report_draft.md` with the project question, BTS data and preparation, features, chronological evaluation design, April holdout metrics, error/calibration interpretation, scenario results, limitations, references, and notebook run order.
 - **Completed:** cross-checked the headline April metrics, February/April calibration errors, and +15/+30-minute scenario figures against the saved CSV outputs under `reports/`.
 - **Completed:** reviewed the sample aircraft chains (UTC labels, routes, scheduled slack, actual turn, and observed delays) and documented airport-local-to-UTC conversion and the `2400` rollover handling.
 - **Key conclusion:** the selected Random Forest separates delayed from non-delayed flights better than the baselines, but its scores are poorly calibrated and the slack scenarios are feature-only illustrations. They do not establish causal savings or operationally feasible schedule changes.
-- Deliverable: `DAY6_REPORT_DRAFT.md`, with reproducible notebook steps and source links. A presentation and final rehearsal remain for Day 7.
+- Deliverable: `../reports/analysis/project_report_draft.md`, with reproducible notebook steps and source links. Presentation preparation remains part of the final project handoff.
 
-### Day 7 — Finalize and rehearse
+### Dashboard and project handoff
 
-- **Completed:** refined the standalone frontend into five compact sections using `dashboard.html`, `styles.css`, `app.js`, and `dashboard-data.js`. It includes the stored aircraft chain, selectable flight legs, combined selected-flight and delay-intelligence view, April scatter sample, expandable feature importance, stored turnaround what-if outputs, and holdout metrics with confusion matrix. It opens directly in a browser without a Python server.
-- **Completed:** created `DAY7_INTERACTIVE_DASHBOARD.ipynb` as a notebook-based alternative for presenting the same saved scenario outputs inside VS Code. Added `ipywidgets` to `requirements.txt` for its controls.
-- **Completed:** added a concise project README with setup instructions, the recommended teacher demo sequence, and links to the report and analysis notebooks.
-- **Final presentation claim:** results apply to the selected Southwest sample and the April holdout. The dashboard predicts a delay category and does not give exact delay minutes or operational recommendations. Detailed scenario analysis remains in the Day 5 notebook.
-- Deliverables: `dashboard.html`, `styles.css`, `app.js`, `dashboard-data.js`, `DAY7_INTERACTIVE_DASHBOARD.ipynb`, `README.md`, `DAY6_REPORT_DRAFT.md`, and the analysis notebooks with saved evaluation outputs.
+- **Completed:** refined the standalone frontend into five compact sections using `../dashboard/dashboard.html`, `../dashboard/styles.css`, `../dashboard/app.js`, and `../dashboard/dashboard-data.js`. It includes the stored aircraft chain, selectable flight legs, combined selected-flight and delay-intelligence view, April scatter sample, expandable feature importance, stored turnaround what-if outputs, and holdout metrics with confusion matrix. It opens directly in a browser without a Python server.
+- **Completed:** created `../notebooks/08_interactive_dashboard.ipynb` as a notebook-based alternative for presenting the same saved scenario outputs inside VS Code. Added `ipywidgets` to `../requirements.txt` for its controls.
+- **Completed:** added a project README with setup instructions, the dashboard walkthrough, and links to the report and analysis notebooks.
+- **Final presentation claim:** results apply to the selected Southwest sample and the April holdout. The dashboard predicts a delay category and does not give exact delay minutes or operational recommendations. Detailed scenario analysis remains in the scenario simulation notebook.
+- Deliverables: `../dashboard/dashboard.html`, `../dashboard/styles.css`, `../dashboard/app.js`, `../dashboard/dashboard-data.js`, `../notebooks/08_interactive_dashboard.ipynb`, `../README.md`, `../reports/analysis/project_report_draft.md`, and the analysis notebooks with saved evaluation outputs.
 
 ## 10. Week-one fallback plan
 
-If tail-number chains or time-zone ordering prove too difficult by the end of Day 2:
+If tail-number chains or time-zone ordering prove too difficult during preprocessing:
 
 1. Keep the same project question but analyze **airport-level delay propagation by time window** rather than aircraft-level propagation.
 2. Predict whether a flight departs 15+ minutes late from schedule, carrier, route, hour, day, and recent airport delay/congestion features.
@@ -217,4 +217,3 @@ If data download or compute is too large, use one carrier and one or two months 
 ## 12. Final project claim template
 
 > Using BTS historical flight data for **[carrier]** during **[dates]**, we linked **[N]** consecutive-flight pairs with usable aircraft identifiers. We tested whether incoming aircraft delay and scheduled turnaround slack help identify next-flight departure delays of 15 minutes or more. We compared **[baseline]** with **[model]** using a chronological test split and used a simplified scenario to explore added turnaround slack. The results describe this historical sample and do not establish that schedule changes would cause the simulated improvement.
-

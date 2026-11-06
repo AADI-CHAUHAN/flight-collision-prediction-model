@@ -81,17 +81,17 @@
   ],
   "error_examples_count": 24,
   "outputs": [
-    "reports/day4_calibration_metrics.csv",
-    "reports/day4_calibration_bins.csv",
-    "reports/day4_random_forest_grouped_importance.csv",
-    "reports/day4_random_forest_encoded_importance.csv",
-    "reports/day4_april_confusion_matrix.csv",
-    "reports/day4_april_error_examples.csv",
-    "reports/day4_april_errors_by_inbound_delay.csv",
-    "reports/day4_april_errors_by_slack.csv",
-    "reports/day4_figures/day4_calibration_curve.png",
-    "reports/day4_figures/day4_grouped_feature_importance.png",
-    "reports/day4_run_summary.json",
-    "reports/day4_error_analysis.md"
+    "reports/metrics/day4_calibration_metrics.csv",
+    "reports/metrics/day4_calibration_bins.csv",
+    "reports/metrics/day4_random_forest_grouped_importance.csv",
+    "reports/metrics/day4_random_forest_encoded_importance.csv",
+    "reports/metrics/day4_april_confusion_matrix.csv",
+    "reports/metrics/day4_april_error_examples.csv",
+    "reports/metrics/day4_april_errors_by_inbound_delay.csv",
+    "reports/metrics/day4_april_errors_by_slack.csv",
+    "reports/figures/day4_calibration_curve.png",
+    "reports/figures/day4_grouped_feature_importance.png",
+    "reports/metrics/day4_run_summary.json",
+    "reports/analysis/day4_error_analysis.md"
   ]
 }

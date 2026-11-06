@@ -2,25 +2,25 @@
   "scope": "Southwest (WN) rows in each BTS monthly source file",
   "files": [
     {
-      "file": "T_ONTIME_REPORTING_20261027_145650\\T_ONTIME_REPORTING.csv",
+      "file": "data/raw/T_ONTIME_REPORTING_20261027_145650/T_ONTIME_REPORTING.csv",
       "source_rows_all_carriers": 544003,
       "rows_for_WN": 104002,
       "columns": 23
     },
     {
-      "file": "T_ONTIME_REPORTING_20261027_145800\\T_ONTIME_REPORTING.csv",
+      "file": "data/raw/T_ONTIME_REPORTING_20261027_145800/T_ONTIME_REPORTING.csv",
       "source_rows_all_carriers": 515037,
       "rows_for_WN": 100783,
       "columns": 23
     },
     {
-      "file": "T_ONTIME_REPORTING_20261027_150025\\T_ONTIME_REPORTING.csv",
+      "file": "data/raw/T_ONTIME_REPORTING_20261027_150025/T_ONTIME_REPORTING.csv",
       "source_rows_all_carriers": 612102,
       "rows_for_WN": 122298,
       "columns": 23
     },
     {
-      "file": "T_ONTIME_REPORTING_20261029_080530\\T_ONTIME_REPORTING.csv",
+      "file": "data/raw/T_ONTIME_REPORTING_20261029_080530/T_ONTIME_REPORTING.csv",
       "source_rows_all_carriers": 597919,
       "rows_for_WN": 117814,
       "columns": 17
@@ -55,7 +55,7 @@
     "CANCELLATION_CODE"
   ],
   "outputs": [
-    "reports\\day2_raw_column_profile.csv",
-    "reports\\day2_raw_descriptive_statistics.csv"
+    "reports/metrics/day2_raw_column_profile.csv",
+    "reports/metrics/day2_raw_descriptive_statistics.csv"
   ]
 }

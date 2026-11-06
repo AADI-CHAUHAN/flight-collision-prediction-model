@@ -1,4 +1,4 @@
-# Day 2 - Sample aircraft chains
+# Sample aircraft chains
 
 Ten deterministic examples from the linked WN flight pairs. Times below are UTC; turnaround slack is between the previous scheduled arrival and this flight's scheduled departure.
 
