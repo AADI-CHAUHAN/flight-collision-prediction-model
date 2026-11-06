@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment
+.env
+.env.*
+
+# Temporary files
+*.log
+
+# Large datasets
+data/raw/
+data/processed/*.csv
+
+# Original reporting datasets
+T_ONTIME_REPORTING_*/
+
+# Backup ZIP files
+T_ONTIME_REPORTING_*.zip

@@ -1,0 +1,59 @@
+{
+  "data_file": "data\\processed\\wn_aircraft_pairs_2026-01_to_2026-04.csv",
+  "validation_model_selection": "January fit, February F1 validation",
+  "final_training_period": "2026-01-01 through 2026-03-31",
+  "fresh_test_period": "2026-04-01 through 2026-04-30",
+  "selected_model": "Engineered random forest",
+  "selected_threshold_from_february": 0.49879784491634016,
+  "train_rows": 309576,
+  "april_test_rows": 114084,
+  "april_positive_rate": 0.2557764454261772,
+  "march_previously_inspected": true,
+  "april_previously_used_for_selection": false,
+  "metrics": [
+    {
+      "MODEL": "Majority baseline",
+      "THRESHOLD": 0.5,
+      "TRAIN_ROWS": 309576,
+      "APRIL_TEST_ROWS": 114084,
+      "APRIL_POSITIVE_RATE": 0.2557764454261772,
+      "ACCURACY": 0.7442235545738228,
+      "PRECISION": 0.0,
+      "RECALL": 0.0,
+      "F1": 0.0,
+      "ROC_AUC": 0.5,
+      "PR_AUC_AVERAGE_PRECISION": 0.2557764454261772
+    },
+    {
+      "MODEL": "Balanced logistic regression",
+      "THRESHOLD": 0.5,
+      "TRAIN_ROWS": 309576,
+      "APRIL_TEST_ROWS": 114084,
+      "APRIL_POSITIVE_RATE": 0.2557764454261772,
+      "ACCURACY": 0.7859209003891869,
+      "PRECISION": 0.5610764450607297,
+      "RECALL": 0.7488005483207677,
+      "F1": 0.641486722545983,
+      "ROC_AUC": 0.8486712717655814,
+      "PR_AUC_AVERAGE_PRECISION": 0.6988930064259348
+    },
+    {
+      "MODEL": "Selected Engineered random forest",
+      "THRESHOLD": 0.49879784491634016,
+      "TRAIN_ROWS": 309576,
+      "APRIL_TEST_ROWS": 114084,
+      "APRIL_POSITIVE_RATE": 0.2557764454261772,
+      "ACCURACY": 0.8525735423021633,
+      "PRECISION": 0.6948025341192045,
+      "RECALL": 0.7554489376285127,
+      "F1": 0.723857684666787,
+      "ROC_AUC": 0.8870397158065939,
+      "PR_AUC_AVERAGE_PRECISION": 0.8177524512203316
+    }
+  ],
+  "outputs": [
+    "reports/day3_april_final_metrics.csv",
+    "reports/day3_april_final_confusion_matrix.csv",
+    "reports/day3_april_final_summary.json"
+  ]
+}

@@ -1,0 +1,14 @@
+YEAR,MONTH,CANCELLATION_CODE,CANCELLED_FLIGHTS,CODE_DESCRIPTION
+2026,1,A,96,Air carrier
+2026,1,B,2509,Weather
+2026,1,C,125,National aviation system
+2026,2,A,110,Air carrier
+2026,2,B,833,Weather
+2026,2,C,75,National aviation system
+2026,3,A,299,Air carrier
+2026,3,B,808,Weather
+2026,3,C,802,National aviation system
+2026,3,D,2,Security
+2026,4,A,154,Air carrier
+2026,4,B,133,Weather
+2026,4,C,23,National aviation system

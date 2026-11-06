@@ -1,0 +1,60 @@
+{
+  "dataset": "data\\processed\\wn_aircraft_pairs_2026-01_to_2026-04.csv",
+  "target": "DEP_DEL15 (current departure delay >= 15 minutes)",
+  "train_period": "2026-01-01 to 2026-02-28",
+  "test_period": "2026-03-01 to 2026-03-31",
+  "train_rows": 194870,
+  "test_rows": 114706,
+  "feature_columns": [
+    "PREV_ARR_DELAY_MIN",
+    "SCHEDULED_TURNAROUND_SLACK_MIN",
+    "ORIGIN",
+    "DEST",
+    "DEPARTURE_HOUR_LOCAL",
+    "DAY_OF_WEEK"
+  ],
+  "leakage_excluded": [
+    "DEP_DELAY_MIN",
+    "ACTUAL_DEP_UTC",
+    "ACTUAL_ARR_UTC",
+    "PREV_ACTUAL_ARR_UTC"
+  ],
+  "results": [
+    {
+      "MODEL": "Majority baseline",
+      "TEST_ROWS": 114706,
+      "TEST_POSITIVE_RATE": 0.30222481823095565,
+      "ACCURACY": 0.6977751817690443,
+      "PRECISION": 0.0,
+      "RECALL": 0.0,
+      "F1": 0.0,
+      "ROC_AUC": 0.5,
+      "PR_AUC_AVERAGE_PRECISION": 0.30222481823095565
+    },
+    {
+      "MODEL": "Balanced logistic regression",
+      "TEST_ROWS": 114706,
+      "TEST_POSITIVE_RATE": 0.30222481823095565,
+      "ACCURACY": 0.7766899726256691,
+      "PRECISION": 0.6071344032571131,
+      "RECALL": 0.7398678858857126,
+      "F1": 0.6669613719397242,
+      "ROC_AUC": 0.8374298478953535,
+      "PR_AUC_AVERAGE_PRECISION": 0.7066166561999162
+    }
+  ],
+  "outputs": [
+    "reports\\day3_figures\\delay_distributions.png",
+    "reports\\day3_figures\\delay_rates_by_schedule_and_origin.png",
+    "reports\\day3_figures\\propagation_by_inbound_delay_and_slack.png",
+    "reports\\day3_delay_rate_by_hour.csv",
+    "reports\\day3_delay_rate_by_weekday.csv",
+    "reports\\day3_delay_rate_by_origin.csv",
+    "reports\\day3_propagation_by_inbound_delay.csv",
+    "reports\\day3_propagation_by_scheduled_slack.csv",
+    "reports\\day3_baseline_metrics.csv",
+    "reports\\day3_logistic_confusion_matrix.csv",
+    "reports\\day3_delay_quantiles.csv",
+    "reports\\day3_run_summary.json"
+  ]
+}

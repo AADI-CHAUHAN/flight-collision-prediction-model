@@ -1,0 +1,108 @@
+airport_code,airport_name,city,timezone
+ABQ,Albuquerque International Sunport Airport,Albuquerque,America/Denver
+ALB,Albany International Airport,Albany,America/New_York
+AMA,Rick Husband Amarillo International Airport,Amarillo,America/Chicago
+ATL,Hartsfield/Jackson Atlanta International Airport,Atlanta,America/New_York
+AUS,Austin-Bergstrom International Airport,Austin,America/Chicago
+BDL,Bradley International Airport,Windsor Locks,America/New_York
+BHM,Birmingham-Shuttlesworth International Airport,Birmingham,America/Chicago
+BNA,Nashville International Airport,Nashville,America/Chicago
+BOI,Boise Air Trml/Gowen Field,Boise,America/Boise
+BOS,General Edward Lawrence Logan International Airport,Boston,America/New_York
+BUF,Buffalo Niagara International Airport,Buffalo,America/New_York
+BUR,Hollywood Burbank Airport,Burbank,America/Los_Angeles
+BWI,Baltimore/Washington International Thurgood Marshall Airport,Baltimore,America/New_York
+BZN,Bozeman Yellowstone International Airport,Bozeman,America/Denver
+CHS,Charleston Afb/International Airport,Charleston,America/New_York
+CLE,Cleveland-Hopkins International Airport,Cleveland,America/New_York
+CLT,Charlotte/Douglas International Airport,Charlotte,America/New_York
+CMH,John Glenn Columbus International Airport,Columbus,America/New_York
+COS,City Of Colorado Springs Municipal Airport,Colorado Springs,America/Denver
+CRP,Corpus Christi International Airport,Corpus Christi,America/Chicago
+CVG,Cincinnati/Northern Kentucky International Airport,Covington,America/New_York
+DAL,Dallas Love Field,Dallas,America/Chicago
+DCA,Ronald Reagan Washington Ntl Airport,Washington,America/New_York
+DEN,Denver International Airport,Denver,America/Denver
+DSM,Des Moines International Airport,Des Moines,America/Chicago
+DTW,Detroit Metro Wayne County Airport,Detroit,America/New_York
+ECP,Northwest Florida Beaches International Airport,Panama City,America/Chicago
+ELP,El Paso International Airport,El Paso,America/Denver
+EUG,Mahlon Sweet Field,Eugene,America/Los_Angeles
+FAT,Fresno Yosemite International Airport,Fresno,America/Los_Angeles
+FLL,Fort Lauderdale/Hollywood International Airport,Fort Lauderdale,America/New_York
+GEG,Spokane International Airport,Spokane,America/Los_Angeles
+GRR,Gerald R Ford International Airport,Grand Rapids,America/New_York
+GSP,Greenville Spartanburg International Airport,Greer,America/New_York
+HDN,Yampa Valley Airport,Hayden,America/Denver
+HNL,Daniel K Inouye International Airport,Honolulu,Pacific/Honolulu
+HOU,William P Hobby Airport,Houston,America/Chicago
+HRL,Valley International Airport,Harlingen,America/Chicago
+IAD,Washington Dulles International Airport,Washington,America/New_York
+ICT,Wichita Dwight D Eisenhower Ntl Airport,Wichita,America/Chicago
+IND,Indianapolis International Airport,Indianapolis,America/New_York
+ISP,Long Island Mac Arthur Airport,New York,America/New_York
+ITO,Hilo International Airport,Hilo,Pacific/Honolulu
+JAN,Jackson-Medgar Wiley Evers International Airport,Jackson,America/Chicago
+JAX,Jacksonville International Airport,Jacksonville,America/New_York
+KOA,Ellison Onizuka Kona International At Keahole Airport,Kailua-Kona,Pacific/Honolulu
+LAS,Harry Reid International Airport,Las Vegas,America/Los_Angeles
+LAX,Los Angeles International Airport,Los Angeles,America/Los_Angeles
+LBB,Lubbock Preston Smith International Airport,Lubbock,America/Chicago
+LGA,Laguardia Airport,New York,America/New_York
+LGB,Long Beach (Daugherty Field) Airport,Long Beach,America/Los_Angeles
+LIH,Lihue Airport,Lihue,Pacific/Honolulu
+LIT,Bill And Hillary Clinton Ntl/Adams Field,Little Rock,America/Chicago
+MAF,Midland International Air And Space Port Airport,Midland,America/Chicago
+MCI,Kansas City International Airport,Kansas City,America/Chicago
+MCO,Orlando International Airport,Orlando,America/New_York
+MDW,Chicago Midway International Airport,Chicago,America/Chicago
+MEM,Frederick W Smith International/Memphis Airport,Memphis,America/Chicago
+MHT,Manchester Boston Regional Airport,Manchester,America/New_York
+MIA,Miami International Airport,Miami,America/New_York
+MKE,General Mitchell International Airport,Milwaukee,America/Chicago
+MSP,Minneapolis-St Paul International/Wold-Chamberlain Airport,Minneapolis,America/Chicago
+MSY,Louis Armstrong New Orleans International Airport,New Orleans,America/Chicago
+MTJ,Montrose Regional Airport,Montrose,America/Denver
+MYR,Myrtle Beach International Airport,Myrtle Beach,America/New_York
+OAK,Oakland San Francisco Bay Airport,Oakland,America/Los_Angeles
+OGG,Kahului Airport,Kahului,Pacific/Honolulu
+OKC,Okc Will Rogers International Airport,Oklahoma City,America/Chicago
+OMA,Eppley Airfield,Omaha,America/Chicago
+ONT,Ontario International Airport,Ontario,America/Los_Angeles
+ORD,Chicago O'Hare International Airport,Chicago,America/Chicago
+ORF,Norfolk International Airport,Norfolk,America/New_York
+PBI,President Donald J Trump International Airport,West Palm Beach,America/New_York
+PDX,Portland International Airport,Portland,America/Los_Angeles
+PHL,Philadelphia International Airport,Philadelphia,America/New_York
+PHX,Phoenix Sky Harbor International Airport,Phoenix,America/Phoenix
+PIT,Pittsburgh International Airport,Pittsburgh,America/New_York
+PNS,Pensacola International Airport,Pensacola,America/Chicago
+PSP,Palm Springs International Airport,Palm Springs,America/Los_Angeles
+PVD,Rhode Island Tf Green International Airport,Providence,America/New_York
+PWM,Portland International Jetport Airport,Portland,America/New_York
+RDU,Raleigh-Durham International Airport,Raleigh/Durham,America/New_York
+RIC,Richmond International Airport,Richmond,America/New_York
+RNO,Reno/Tahoe International Airport,Reno,America/Los_Angeles
+ROC,Frederick Douglass/Greater Rochester International Airport,Rochester,America/New_York
+RSW,Southwest Florida International Airport,Fort Myers,America/New_York
+SAN,San Diego International Airport,San Diego,America/Los_Angeles
+SAT,San Antonio International Airport,San Antonio,America/Chicago
+SAV,Savannah/Hilton Head International Airport,Savannah,America/New_York
+SBA,Santa Barbara Municipal Airport,Santa Barbara,America/Los_Angeles
+SDF,Louisville Muhammad Ali International Airport,Louisville,America/Kentucky/Louisville
+SEA,Seattle-Tacoma International Airport,Seattle,America/Los_Angeles
+SFO,San Francisco International Airport,San Francisco,America/Los_Angeles
+SJC,Mineta San Jose International Airport,San Jose,America/Los_Angeles
+SJU,Luis Munoz Marin International Airport,San Juan,America/Puerto_Rico
+SLC,Salt Lake City International Airport,Salt Lake City,America/Denver
+SMF,Sacramento International Airport,Sacramento,America/Los_Angeles
+SNA,John Wayne/Orange County Airport,Santa Ana,America/Los_Angeles
+SRQ,Sarasota/Bradenton International Airport,Sarasota/Bradenton,America/New_York
+STL,St Louis Lambert International Airport,St Louis,America/Chicago
+STS,Charles M. Schulz-Sonoma County Airport,Santa Rosa,America/Los_Angeles
+STT,Cyril E King Airport,Charlotte Amalie,America/St_Thomas
+TPA,Tampa International Airport,Tampa,America/New_York
+TUL,Tulsa International Airport,Tulsa,America/Chicago
+TUS,Tucson International Airport,Tucson,America/Phoenix
+TYS,Mc Ghee Tyson Airport,Knoxville,America/New_York
+VPS,Eglin Afb/Destin-Ft Walton Beach Airport,Valparaiso/Destin-Ft Walton Beach,America/Chicago

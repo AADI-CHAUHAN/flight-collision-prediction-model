@@ -1,0 +1,159 @@
+{
+  "carrier": "WN",
+  "period": "2026-01_to_2026-04",
+  "raw_files": [
+    {
+      "file": "T_ONTIME_REPORTING_20261027_145650\\T_ONTIME_REPORTING.csv",
+      "rows_for_WN": 104002,
+      "cancelled_for_WN": 2730,
+      "diverted_for_WN": 152,
+      "missing_tail_for_WN": 512,
+      "unparsed_actual_departures": 2697,
+      "unparsed_actual_arrivals": 2752
+    },
+    {
+      "file": "T_ONTIME_REPORTING_20261027_145800\\T_ONTIME_REPORTING.csv",
+      "rows_for_WN": 100783,
+      "cancelled_for_WN": 1018,
+      "diverted_for_WN": 187,
+      "missing_tail_for_WN": 122,
+      "unparsed_actual_departures": 1003,
+      "unparsed_actual_arrivals": 1043
+    },
+    {
+      "file": "T_ONTIME_REPORTING_20261027_150025\\T_ONTIME_REPORTING.csv",
+      "rows_for_WN": 122298,
+      "cancelled_for_WN": 1911,
+      "diverted_for_WN": 285,
+      "missing_tail_for_WN": 92,
+      "unparsed_actual_departures": 1867,
+      "unparsed_actual_arrivals": 1953
+    },
+    {
+      "file": "T_ONTIME_REPORTING_20261029_080530\\T_ONTIME_REPORTING.csv",
+      "rows_for_WN": 117814,
+      "cancelled_for_WN": 310,
+      "diverted_for_WN": 174,
+      "missing_tail_for_WN": 0,
+      "unparsed_actual_departures": 292,
+      "unparsed_actual_arrivals": 345
+    }
+  ],
+  "wn_flight_rows": 444897,
+  "wn_cancelled_rows": 5969,
+  "wn_diverted_rows": 798,
+  "wn_eligible_operated_flights_with_required_times_and_delays": 438130,
+  "pairs_linked_by_tail_and_matching_airport": 423660,
+  "distinct_tails_in_pairs": 808,
+  "tail_groups_with_two_or_more_pairs": 808,
+  "pair_target_rate_dep_del15": 0.24099985837700041,
+  "pair_rows_without_prev_arrival_delay": 0,
+  "cancellations_by_month_and_code": [
+    {
+      "YEAR": 2026,
+      "MONTH": 1,
+      "CANCELLATION_CODE": "A",
+      "CANCELLED_FLIGHTS": 96,
+      "CODE_DESCRIPTION": "Air carrier"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 1,
+      "CANCELLATION_CODE": "B",
+      "CANCELLED_FLIGHTS": 2509,
+      "CODE_DESCRIPTION": "Weather"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 1,
+      "CANCELLATION_CODE": "C",
+      "CANCELLED_FLIGHTS": 125,
+      "CODE_DESCRIPTION": "National aviation system"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 2,
+      "CANCELLATION_CODE": "A",
+      "CANCELLED_FLIGHTS": 110,
+      "CODE_DESCRIPTION": "Air carrier"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 2,
+      "CANCELLATION_CODE": "B",
+      "CANCELLED_FLIGHTS": 833,
+      "CODE_DESCRIPTION": "Weather"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 2,
+      "CANCELLATION_CODE": "C",
+      "CANCELLED_FLIGHTS": 75,
+      "CODE_DESCRIPTION": "National aviation system"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 3,
+      "CANCELLATION_CODE": "A",
+      "CANCELLED_FLIGHTS": 299,
+      "CODE_DESCRIPTION": "Air carrier"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 3,
+      "CANCELLATION_CODE": "B",
+      "CANCELLED_FLIGHTS": 808,
+      "CODE_DESCRIPTION": "Weather"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 3,
+      "CANCELLATION_CODE": "C",
+      "CANCELLED_FLIGHTS": 802,
+      "CODE_DESCRIPTION": "National aviation system"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 3,
+      "CANCELLATION_CODE": "D",
+      "CANCELLED_FLIGHTS": 2,
+      "CODE_DESCRIPTION": "Security"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 4,
+      "CANCELLATION_CODE": "A",
+      "CANCELLED_FLIGHTS": 154,
+      "CODE_DESCRIPTION": "Air carrier"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 4,
+      "CANCELLATION_CODE": "B",
+      "CANCELLED_FLIGHTS": 133,
+      "CODE_DESCRIPTION": "Weather"
+    },
+    {
+      "YEAR": 2026,
+      "MONTH": 4,
+      "CANCELLATION_CODE": "C",
+      "CANCELLED_FLIGHTS": 23,
+      "CODE_DESCRIPTION": "National aviation system"
+    }
+  ],
+  "airport_timezone_mappings_used": 107,
+  "missing_or_unresolved_timestamps_in_flight_file": {
+    "SCHEDULED_DEP_UTC": 0,
+    "ACTUAL_DEP_UTC": 5859,
+    "SCHEDULED_ARR_UTC": 0,
+    "ACTUAL_ARR_UTC": 6093
+  },
+  "outputs": [
+    "reports\\day2_raw_column_profile.csv",
+    "reports\\day2_raw_descriptive_statistics.csv",
+    "reports\\day2_raw_dataset_profile.json",
+    "data\\processed\\wn_flights_2026-01_to_2026-04.csv",
+    "data\\processed\\wn_aircraft_pairs_2026-01_to_2026-04.csv",
+    "reports\\day2_cancellation_summary.csv"
+  ]
+}

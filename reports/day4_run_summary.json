@@ -1,0 +1,97 @@
+{
+  "selected_model": "Engineered Random Forest",
+  "locked_threshold": 0.49879784491634016,
+  "candidate_fit_period": "January 2026",
+  "threshold_validation_period": "February 2026",
+  "final_fit_period": "January-March 2026",
+  "final_evaluation_period": "April 2026",
+  "model_settings": {
+    "n_estimators": 120,
+    "max_depth": 14,
+    "min_samples_leaf": 40,
+    "max_features": "sqrt",
+    "class_weight": "balanced_subsample",
+    "random_state": 42
+  },
+  "april_metrics": {
+    "ROWS": 114084,
+    "POSITIVE_RATE": 0.2557764454261772,
+    "THRESHOLD": 0.49879784491634016,
+    "ACCURACY": 0.8525735423021633,
+    "PRECISION": 0.6948025341192045,
+    "RECALL": 0.7554489376285127,
+    "F1": 0.723857684666787,
+    "ROC_AUC": 0.8870397158065939,
+    "AVERAGE_PRECISION": 0.8177524512203316,
+    "BRIER_SCORE": 0.13317737551733472
+  },
+  "calibration": [
+    {
+      "SPLIT": "February validation (Jan-fit model)",
+      "ROWS": 97097,
+      "POSITIVE_RATE": 0.22007889018198296,
+      "BRIER_SCORE": 0.141599037441755,
+      "ECE": 0.2027183887426215
+    },
+    {
+      "SPLIT": "April holdout (Jan-Mar-fit model)",
+      "ROWS": 114084,
+      "POSITIVE_RATE": 0.2557764454261772,
+      "BRIER_SCORE": 0.13317737551733472,
+      "ECE": 0.18321243808236906
+    }
+  ],
+  "grouped_feature_importance": [
+    {
+      "ORIGINAL_FEATURE": "PREV_ARR_DELAY_LOG1P",
+      "IMPORTANCE": 0.3733065153900732
+    },
+    {
+      "ORIGINAL_FEATURE": "PREV_DELAY_X_SHORT_SLACK",
+      "IMPORTANCE": 0.3157851769708604
+    },
+    {
+      "ORIGINAL_FEATURE": "DEPARTURE_HOUR_SIN",
+      "IMPORTANCE": 0.1190300508027078
+    },
+    {
+      "ORIGINAL_FEATURE": "SCHEDULED_SLACK_LOG1P",
+      "IMPORTANCE": 0.08000795730275805
+    },
+    {
+      "ORIGINAL_FEATURE": "SHORT_SLACK_LT_60",
+      "IMPORTANCE": 0.052057435718782984
+    },
+    {
+      "ORIGINAL_FEATURE": "DEPARTURE_HOUR_COS",
+      "IMPORTANCE": 0.023038244205817748
+    },
+    {
+      "ORIGINAL_FEATURE": "ORIGIN",
+      "IMPORTANCE": 0.01782484372106678
+    },
+    {
+      "ORIGINAL_FEATURE": "DAY_OF_WEEK",
+      "IMPORTANCE": 0.01221825993897858
+    },
+    {
+      "ORIGINAL_FEATURE": "DEST",
+      "IMPORTANCE": 0.006731515948954611
+    }
+  ],
+  "error_examples_count": 24,
+  "outputs": [
+    "reports/day4_calibration_metrics.csv",
+    "reports/day4_calibration_bins.csv",
+    "reports/day4_random_forest_grouped_importance.csv",
+    "reports/day4_random_forest_encoded_importance.csv",
+    "reports/day4_april_confusion_matrix.csv",
+    "reports/day4_april_error_examples.csv",
+    "reports/day4_april_errors_by_inbound_delay.csv",
+    "reports/day4_april_errors_by_slack.csv",
+    "reports/day4_figures/day4_calibration_curve.png",
+    "reports/day4_figures/day4_grouped_feature_importance.png",
+    "reports/day4_run_summary.json",
+    "reports/day4_error_analysis.md"
+  ]
+}

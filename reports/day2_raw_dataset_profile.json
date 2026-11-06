@@ -1,0 +1,61 @@
+{
+  "scope": "Southwest (WN) rows in each BTS monthly source file",
+  "files": [
+    {
+      "file": "T_ONTIME_REPORTING_20261027_145650\\T_ONTIME_REPORTING.csv",
+      "source_rows_all_carriers": 544003,
+      "rows_for_WN": 104002,
+      "columns": 23
+    },
+    {
+      "file": "T_ONTIME_REPORTING_20261027_145800\\T_ONTIME_REPORTING.csv",
+      "source_rows_all_carriers": 515037,
+      "rows_for_WN": 100783,
+      "columns": 23
+    },
+    {
+      "file": "T_ONTIME_REPORTING_20261027_150025\\T_ONTIME_REPORTING.csv",
+      "source_rows_all_carriers": 612102,
+      "rows_for_WN": 122298,
+      "columns": 23
+    },
+    {
+      "file": "T_ONTIME_REPORTING_20261029_080530\\T_ONTIME_REPORTING.csv",
+      "source_rows_all_carriers": 597919,
+      "rows_for_WN": 117814,
+      "columns": 17
+    }
+  ],
+  "column_count": 23,
+  "numeric_columns": [
+    "YEAR",
+    "MONTH",
+    "DAY_OF_MONTH",
+    "OP_CARRIER_FL_NUM",
+    "ORIGIN_AIRPORT_ID",
+    "DEST_AIRPORT_ID",
+    "DEST_AIRPORT_SEQ_ID",
+    "DEST_CITY_MARKET_ID",
+    "CRS_DEP_TIME",
+    "DEP_TIME",
+    "DEP_DELAY",
+    "DEP_DELAY_NEW",
+    "CRS_ARR_TIME",
+    "ARR_TIME",
+    "ARR_DELAY_NEW",
+    "ARR_DEL15",
+    "CANCELLED",
+    "DIVERTED"
+  ],
+  "categorical_or_text_columns": [
+    "OP_UNIQUE_CARRIER",
+    "TAIL_NUM",
+    "ORIGIN",
+    "DEST",
+    "CANCELLATION_CODE"
+  ],
+  "outputs": [
+    "reports\\day2_raw_column_profile.csv",
+    "reports\\day2_raw_descriptive_statistics.csv"
+  ]
+}
