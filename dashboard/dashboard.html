@@ -5,6 +5,10 @@
   <meta name="theme-color" content="#091522">
   <title>Flight Domino | Aircraft Operations Intelligence</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .filter-block{background:#102234;border:1px solid #263f52;border-radius:8px;padding:16px}.filter-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:12px}.filter-grid label{display:grid;gap:5px;color:#91a9ba;font:8px var(--mono);letter-spacing:.04em}.filter-grid select,.filter-grid input{width:100%;box-sizing:border-box;background:#0b1b29;color:#dbe7ec;border:1px solid #345166;border-radius:4px;padding:8px;font:10px var(--mono)}.filter-grid select{min-height:32px}.filter-grid input{padding:0;accent-color:var(--cyan)}.range-label{grid-column:span 2}.range-label output{float:right;color:var(--cyan)}.filter-status{display:flex;gap:8px;align-items:baseline;border-top:1px solid #263f52;margin-top:13px;padding-top:10px;color:#7892a2;font-size:10px}.filter-status b{color:var(--cyan);font:12px var(--mono)}.reset-filters{align-self:center;background:transparent;color:var(--cyan);border:1px solid #345166;border-radius:4px;padding:7px 10px;font:9px var(--mono);cursor:pointer}.reset-filters:hover{background:#173046}.quality-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.quality-card{background:#102234;border:1px solid #263f52;border-radius:6px;padding:12px}.quality-card b{display:block;color:#e5edf1;font:650 20px var(--display)}.quality-card small{display:block;color:#91a9ba;font:8px var(--mono);letter-spacing:.04em;margin-top:5px}.quality-card span{display:block;color:#70899a;font-size:9px;margin-top:7px}.quality-card.warn{border-color:#725a32}.quality-note{color:#7892a2;font-size:10px;line-height:1.5;margin:10px 0 0}.section-heading{scroll-margin-top:18px}@media(max-width:1000px){.filter-grid{grid-template-columns:repeat(3,1fr)}.quality-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:600px){.filter-grid{grid-template-columns:repeat(2,1fr)}.range-label{grid-column:span 2}.quality-grid{grid-template-columns:repeat(2,1fr)}.filter-block .section-heading{display:block}.reset-filters{margin-top:10px}}
+    .explainability-subtitle{border-top:1px solid #263f52;padding-top:9px;margin-top:7px;color:#91a9ba;font:8px var(--mono);letter-spacing:.04em}.reason-code-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.reason-code-grid>div{background:#102234;border:1px solid #263f52;border-radius:5px;padding:9px}.reason-code-grid small{display:block;color:#91a9ba;font:8px var(--mono);margin-bottom:5px}.reason-code-grid b{display:block;color:#dbe7ec;font-size:10px;line-height:1.45}.empirical-turnaround{margin-top:10px}.empirical-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid #263f52;color:#a9bdc8;font:9px var(--mono)}.empirical-row b{color:var(--cyan)}.empirical-row small{color:#71899a}@media(max-width:600px){.reason-code-grid{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
 <aside class="sidebar">
@@ -14,7 +18,7 @@
     <a class="nav-link active" href="#overview"><span>⌂</span>Overview</a>
     <a class="nav-link" href="#explorer"><span>⌖</span>Flight Chain</a>
     <a class="nav-link" href="#intelligence"><span>⌁</span>Delay intelligence</a>
-    <a class="nav-link" href="#scenarios"><span>◷</span>What-if Simulator</a>
+    <a class="nav-link" href="#scenarios"><span>◷</span>Feature Sensitivity</a>
     <a class="nav-link" href="#performance"><span>▥</span>Model Performance</a>
   </nav>
   <div class="sidebar-bottom"><span class="live-dot"></span><div><b>Historical analysis</b><small>Not live flight tracking</small></div></div>
@@ -31,6 +35,21 @@
     <article class="kpi" title="Ability to rank delayed flights above non-delayed flights"><span class="kpi-icon green"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17M8 15l4-5 3 2 5-7"/></svg></span><b>0.887</b><small>ROC-AUC</small></article>
   </section>
 
+  <section class="section-block filter-block" id="filters">
+    <div class="section-heading"><div><div class="section-kicker">FILTERS / APRIL FLIGHT PAIRS</div><h2>Focus the operating pattern</h2><p>All controls are client-side and update the stored aircraft chains below.</p></div><button class="reset-filters" id="resetFilters" type="button">Reset filters</button></div>
+    <div class="filter-grid" role="group" aria-label="Interactive dashboard filters">
+      <label>Aircraft tail<select id="filterTail"><option value="">All tails</option></select></label>
+      <label>Origin<select id="filterOrigin"><option value="">All origins</option></select></label>
+      <label>Destination<select id="filterDest"><option value="">All destinations</option></select></label>
+      <label>Date / month<select id="filterMonth"><option value="">All months</option></select></label>
+      <label>Delay severity<select id="filterSeverity"><option value="">All outcomes</option><option value="clear">Under 15 min</option><option value="mild">15–59 min</option><option value="severe">60+ min</option></select></label>
+      <label>Prediction result<select id="filterCorrect"><option value="">Correct + incorrect</option><option value="correct">Correct only</option><option value="incorrect">Incorrect only</option></select></label>
+      <label class="range-label">Previous arrival delay <output id="prevRangeValue"></output><input id="prevDelayRange" type="range" min="0" max="1" step="1" value="1"></label>
+      <label class="range-label">Turnaround slack <output id="slackRangeValue"></output><input id="slackRange" type="range" min="0" max="1" step="1" value="1"></label>
+    </div>
+    <div class="filter-status"><b id="filterCount">—</b><span id="filterSummary">Loading linked flight pairs</span></div>
+  </section>
+
   <section class="section-block" id="explorer">
     <div class="section-heading"><div><div class="section-kicker">01 / AIRCRAFT FLIGHT CHAIN</div><h2>Follow one aircraft through its day</h2><p>Previous arrival <i>→</i> turnaround <i>→</i> next departure</p></div><label class="tail-select">DEMO AIRCRAFT<select id="tailSelector" aria-label="Choose aircraft chain"></select></label></div>
     <div class="chain-shell">
@@ -39,6 +58,7 @@
         <svg id="routeMap" class="route-map" viewBox="0 0 900 290" role="img" aria-label="Schematic diagram of the selected Southwest aircraft flight sequence">
           <path class="map-land" d="M65 47 115 37 164 47 201 63 241 67 276 84 316 82 353 95 384 91 414 103 452 98 483 109 525 99 559 105 588 92 618 100 650 86 676 94 702 77 731 83 753 68 782 78 807 68 829 83 847 110 836 134 851 151 833 169 820 193 792 200 774 217 747 210 727 226 698 220 679 239 649 234 626 249 599 242 575 254 547 241 520 249 493 235 468 237 446 221 422 225 401 207 378 207 361 185 334 184 323 164 296 165 282 145 252 144 238 127 209 133 190 116 164 122 146 105 123 108 105 90 78 93 66 75z"/>
           <path class="map-grid" d="M50 85H850M50 135H850M50 185H850M50 235H850M150 35V255M300 35V255M450 35V255M600 35V255M750 35V255"/>
+          <g id="dynamicMapLayer"></g>
           <path class="route-base" d="M184 134 Q310 85 432 162 Q548 128 626 205 Q544 240 452 187 Q300 245 150 151"/>
           <path id="routeDone" class="route-done"/>
           <path id="routeNow" class="route-now"/>
@@ -53,31 +73,33 @@
         <div class="map-legend"><span><i class="legend-line"></i> Selected flight leg</span><span><i class="legend-dot"></i> Aircraft stops</span></div>
       </div>
       <div class="flight-board" id="flightBoard" aria-label="Select a flight leg"></div>
+      <button class="all-flights-toggle" id="allFlightsToggle" type="button" aria-expanded="false">Show all flight details</button>
+      <div class="all-flight-details" id="allFlightDetails" hidden></div>
     </div>
   </section>
 
   <section class="section-block combined-intelligence" id="intelligence">
-    <div class="section-heading"><div><div class="section-kicker">03 / FLIGHT OUTCOME + DELAY INTELLIGENCE</div><h2>Selected flight and the signals behind it</h2><p>Compare the saved prediction with the actual outcome, then explore April patterns.</p></div></div>
+     <div class="section-heading"><div><div class="section-kicker">03 / FLIGHT OUTCOME + DELAY INTELLIGENCE</div><h2>Selected flight and the signals behind it</h2><p>Compare the stored model result with the actual outcome, then explore April patterns.</p></div></div>
     <div class="selected-section" id="selectedFlight">
     <div class="section-heading compact-heading"><div><div class="section-kicker">SELECTED FLIGHT</div><h2 id="selectedTitle">WN 1577 <span>HOU → ONT</span></h2></div><div class="date-pill" id="flightDate">APR 13, 2026</div></div>
     <div class="detail-grid">
       <article class="detail-card"><div class="detail-head"><span class="step-icon">↙</span><div><small>PREVIOUS ARRIVAL</small><b id="prevRoute">WN 4129 · LAS → DAL</b></div></div><div class="detail-number" id="prevDelay">+89 <small>min</small></div><p>Arrival delay</p><div class="sub-detail">Inbound flight <span id="prevFlightTime">—</span></div></article>
       <article class="detail-card turnaround-card"><div class="detail-head"><span class="step-icon amber-icon">◷</span><div><small>TURNAROUND</small><b id="turnLocation">DAL · Dallas</b></div></div><div class="detail-number" id="turnSlack">45 <small>min</small></div><p>Scheduled time before departure</p><div class="turn-meter"><span id="turnMeter"></span></div><div class="sub-detail" id="turnContext">Short time to reset the schedule</div></article>
       <article class="detail-card"><div class="detail-head"><span class="step-icon">↗</span><div><small>NEXT DEPARTURE</small><b id="nextRoute">DAL → TPA</b></div></div><div class="detail-number" id="actualDelay">+93 <small>min</small></div><p>Actual departure delay</p><div class="sub-detail">Scheduled <span id="scheduledDeparture">— UTC</span> · Actual <span id="actualDeparture">— UTC</span></div></article>
-      <article class="prediction-card" id="predictionCard"><div class="prediction-top"><span>MODEL PREDICTION</span><span class="target-pill">15+ MIN = DELAY</span></div><b id="predictionValue">DELAYED</b><div class="prediction-foot"><span id="actualOutcome">Actual: delayed</span><b id="correctOutcome">PREDICTION CORRECT</b></div><div class="model-score-row"><span>Relative model score</span><b id="modelScore">0.917</b></div><div class="score-meter"><span id="scoreMeter"></span></div><small class="score-note">Score is not a probability.</small></article>
+       <article class="prediction-card" id="predictionCard"><div class="prediction-top"><span>STORED MODEL RESULT</span><span class="target-pill">15+ MIN = DELAY</span></div><b id="predictionValue">DELAYED</b><div class="prediction-foot"><span id="actualOutcome">Actual: delayed</span><b id="correctOutcome">RESULT MATCHES OUTCOME</b></div><div class="model-score-row"><span>Relative model score</span><b id="modelScore">0.917</b></div><div class="score-meter"><span id="scoreMeter"></span></div><small class="score-note">Stored result; score is not a probability.</small></article>
     </div>
     </div>
     <div class="intel-grid">
       <article class="panel scatter-panel"><div class="panel-title"><div><h3>Previous arrival vs next departure</h3><p>Each dot is a sampled April flight pair</p></div><span class="chart-tag">APRIL · BTS</span></div><div class="scatter-wrap"><svg id="scatterChart" viewBox="0 0 620 300" role="img" aria-label="Scatter plot of previous arrival delay versus next departure delay"></svg><div id="scatterTooltip" class="chart-tooltip" hidden></div></div><div class="chart-foot"><span>PREVIOUS ARRIVAL DELAY · MIN</span><span>NEXT DEPARTURE DELAY · MIN</span></div><p class="chart-note" id="scatterNote">Systematic sample from the April evaluation data. Axes limited to −30 to 180 minutes for readability; hover a dot for its flight details.</p></article>
-      <article class="panel importance-panel"><div class="panel-title"><div><h3>Random Forest feature importance</h3></div><span class="chart-tag">MODEL INPUTS</span></div><div id="importanceChart" class="importance-chart"></div><button class="expand-features" id="featureToggle" type="button" aria-expanded="false">Show remaining features</button></article>
+      <article class="panel importance-panel"><div class="panel-title"><div><h3>Global model explainability</h3><p>Impurity, permutation, and SHAP views</p></div><span class="chart-tag">MODEL INPUTS</span></div><div id="importanceChart" class="importance-chart"></div><div id="permutationChart" class="importance-chart"></div><button class="expand-features" id="featureToggle" type="button" aria-expanded="false">Show remaining features</button></article>
     </div>
   </section>
 
   <section class="section-block" id="scenarios">
-    <div class="section-heading"><div><div class="section-kicker">04 / TURNAROUND WHAT-IF</div><h2>What if the schedule allowed more time?</h2><p>See how the stored model output changes when only scheduled turnaround slack is increased.</p></div></div>
+    <div class="section-heading"><div><div class="section-kicker">04 / FEATURE SENSITIVITY ANALYSIS</div><h2>How does added scheduled slack affect model score?</h2><p>Compare hypothetical model scores when only the turnaround-slack feature is increased.</p></div></div>
     <div class="scenario-layout">
       <article class="panel scenario-panel"><div class="panel-title"><div><h3>For the selected flight</h3></div><span class="chart-tag">STORED OUTPUT</span></div><div class="scenario-options" id="scenarioOptions"></div><div class="scenario-detail" id="scenarioDetail"></div><div class="score-comparison" id="scenarioChart" aria-label="Scenario relative score comparison"></div><p class="disclaimer">Illustrative feature-only what-if. Not a causal estimate or schedule recommendation.</p></article>
-      <aside class="panel population-panel"><div class="section-kicker">APRIL POPULATION</div><h3>Across all evaluated flights</h3><p>Mean relative model score by hypothetical added slack.</p><div id="populationScenario"></div><div class="calibration-note">Lower scores indicate a lower model score in this illustration; the score is not a calibrated probability.</div></aside>
+      <aside class="panel population-panel"><div class="section-kicker">APRIL POPULATION</div><h3>Across all evaluated flights</h3><p>Hypothetical model score sensitivity, not an operational simulation.</p><div id="populationScenario"></div><div id="scenarioMonotonicNote" class="calibration-note"></div><div id="empiricalTurnaround" class="empirical-turnaround"></div><div class="calibration-note">This analysis changes scheduled turnaround slack only; it does not alter actual departure time, crew, gates, weather, aircraft availability, or downstream flights.</div></aside>
     </div>
   </section>
 
@@ -87,8 +109,18 @@
       <article class="panel performance-panel"><div class="metric-row"><div><b>85.3%</b><small>ACCURACY</small></div><div><b>69.5%</b><small>PRECISION</small></div><div><b>75.5%</b><small>RECALL</small></div><div><b>72.4%</b><small>F1 SCORE</small></div><div><b>0.887</b><small>ROC-AUC</small></div></div><div class="matrix-title"><b>April prediction results</b><span>Actual / predicted flight count</span></div><div class="matrix-grid"><div class="matrix-corner"></div><div class="matrix-col">Under 15 min</div><div class="matrix-col">15+ min</div><div class="matrix-row">Under 15 min</div><div class="matrix-cell tn"><b>75,221</b></div><div class="matrix-cell fp"><b>9,683</b></div><div class="matrix-row">15+ min</div><div class="matrix-cell fn"><b>7,136</b></div><div class="matrix-cell tp"><b>22,044</b></div></div><p class="performance-copy">The model caught approximately 3 out of 4 flights that actually departed 15+ minutes late.</p><details class="calibration-details"><summary>ⓘ Calibration note</summary><p>Model calibration is weak. Relative scores should not be interpreted as exact probabilities.</p></details></article>
     </div>
   </section>
+  <section class="section-block" id="data-quality">
+    <div class="section-heading"><div><div class="section-kicker">06 / DATA QUALITY</div><h2>What made it into the analysis?</h2><p>Source-level checks make exclusions visible instead of hiding them behind the model.</p></div><span class="chart-tag">JAN–APR 2026 · WN</span></div>
+    <div class="quality-grid" id="qualityGrid"></div>
+    <p class="quality-note" id="qualityNote"></p>
+  </section>
+    <div class="diagnostic-grid">
+      <article class="panel threshold-panel"><div class="panel-title"><div><h3>Threshold sensitivity</h3><p>Change the decision cutoff applied to stored model scores.</p></div><span class="chart-tag">APRIL HOLDOUT</span></div><label class="threshold-control">Decision threshold <output id="thresholdValue">0.50</output><input id="thresholdSlider" type="range" min="0.05" max="0.95" step="0.05" value="0.50"></label><div id="thresholdMetrics" class="threshold-metrics"></div><div class="pr-chart-title">Precision / recall tradeoff</div><div id="prChart" class="pr-chart"></div><div class="matrix-title"><b>Threshold confusion matrix</b><span id="thresholdMatrixLabel">Threshold 0.50</span></div><div id="thresholdMatrix" class="matrix-grid"></div></article>
+      <article class="panel calibration-panel"><div class="panel-title"><div><h3>Calibration and predicted-risk buckets</h3><p>Observed delay rate compared with the stored score.</p></div><span class="chart-tag">Brier <b id="brierScore">—</b></span></div><div id="calibrationChart" class="calibration-chart"></div><div id="riskBuckets" class="risk-buckets"></div></article>
+    </div>
+    <article class="panel explanation-panel"><div class="panel-title"><div><h3>Selected-flight explanation</h3><p>SHAP reason codes show which stored inputs push the model score up or down.</p></div><span class="chart-tag">SHAP + SENSITIVITY</span></div><div id="flightExplanation" class="flight-explanation"></div></article>
 
-  <footer><span>FLIGHT DOMINO · ACADEMIC MACHINE LEARNING PROTOTYPE</span><span>BTS ON-TIME PERFORMANCE · JAN–MAR TRAINING · APRIL EVALUATION · RANDOM FOREST</span><a href="DAY6_REPORT_DRAFT.md">View Project Report ↗</a></footer>
+  <footer><span>FLIGHT DOMINO · ACADEMIC MACHINE LEARNING PROTOTYPE</span><span>BTS ON-TIME PERFORMANCE · JAN–MAR TRAINING · APRIL EVALUATION · RANDOM FOREST</span><a href="../reports/analysis/project_report_draft.md">View Project Report ↗</a></footer>
 </main>
 <script src="dashboard-data.js"></script><script src="app.js"></script>
 </body>

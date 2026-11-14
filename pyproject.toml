@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools==75.6.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flight-delay-domino"
+version = "0.1.0"
+description = "Aircraft delay propagation analysis and scenario dashboard"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "ipykernel==6.29.5",
+  "ipywidgets==8.1.5",
+  "joblib==1.4.2",
+  "jupyter==1.1.1",
+  "matplotlib==3.9.3",
+  "numpy==2.1.3",
+  "openpyxl==3.1.5",
+  "pandas==2.2.3",
+  "scikit-learn==1.5.2",
+  "seaborn==0.13.2",
+  "shap>=0.46",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.4"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]

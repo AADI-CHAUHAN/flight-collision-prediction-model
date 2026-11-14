@@ -67,13 +67,29 @@ Open [dashboard/dashboard.html](dashboard/dashboard.html) directly in a browser.
 
 ## Setup
 
-Use Python 3.10 or later and install the listed dependencies:
+Use Python 3.11 through 3.13 and install the pinned project environment:
 
 ```powershell
-python -m pip install -r requirements.txt
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m src.validate_data
 ```
 
-In VS Code, select the environment as the notebook kernel. Run notebook 02 after placing the extracted monthly BTS CSVs under `data/raw/`; then run notebooks 03-07 in order. Notebook 08 additionally uses `ipywidgets`. The standalone web dashboard can be opened without installing Python dependencies.
+In VS Code, select the environment as the notebook kernel. Run notebook 02 after placing the extracted monthly BTS CSVs under `data/raw/`; then run notebooks 03-07 in order. Notebook 07's final cell regenerates `dashboard/dashboard-data.js` from the scenario outputs, including deterministic demo windows for every eligible aircraft tail. Notebook 08 additionally uses `ipywidgets`. The standalone web dashboard can be opened without installing Python dependencies.
+
+### Raw data setup
+
+The raw BTS files and generated processed CSVs are intentionally excluded from Git because they are large datasets. A fresh clone therefore needs the local data folders prepared before preprocessing:
+
+1. Download the January-April 2026 BTS Reporting Carrier On-Time Performance monthly extracts from the [BTS source](https://transtats.bts.gov/TableInfo.asp?QO_fu146_anzr=b0-gvzr&V0s1_b0yB=D&gnoyr_VQ=FGJ).
+2. Extract each monthly download under `data/raw/`, keeping the original BTS folder and CSV names. The current download layout is documented in [data/raw/README.md](data/raw/README.md).
+3. Confirm that four monthly CSV files are present, then run `python -m src.validate_data`.
+4. Run [02_data_preprocessing.ipynb](notebooks/02_data_preprocessing.ipynb). It reads the raw files and writes generated flight-level and aircraft-pair CSVs under `data/processed/`.
+5. Run notebooks 03–07 in order. The final dashboard export cell calls `src.dashboard_export` and writes threshold diagnostics, calibration buckets, eight sensitivity scenarios, grouped scenario summaries, and selected-flight explanations.
+
+The tracked `data/raw/README.md` and `data/processed/.gitkeep` files preserve this directory structure in GitHub without committing the raw or generated datasets. See [data inventory](documentation/data-inventory.md) for the source coverage and expected fields.
+
+After preprocessing, use `python -m src.validate_data --require-processed` to require the generated pair-level output as well.
 
 ## Repository structure
 
@@ -107,7 +123,7 @@ requirements.txt
 README.md
 ```
 
-No reusable Python source files existed in the original project, so the analysis remains in notebooks rather than being duplicated into placeholder modules. The `src/` subfolders are reserved for later extraction of validated reusable code. The independent [wildlife strike project](wildlife_strike_project/) remains separate and unchanged.
+Reusable timestamp, target, pairing, scenario, configuration, and validation code lives under `src/`; notebooks use these helpers where the workflow is shared. Automated regression tests live under `tests/`.
 
 ## Documentation
 

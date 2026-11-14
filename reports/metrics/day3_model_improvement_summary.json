@@ -5,7 +5,7 @@
   "march_comparison_period": "2026-03-01 through 2026-03-31",
   "selection_metric": "February validation F1",
   "selected_model": "Engineered random forest",
-  "selected_threshold": 0.49879784491634016,
+  "selected_threshold": 0.4987978449163402,
   "engineered_features": [
     "PREV_ARR_DELAY_LOG1P",
     "SCHEDULED_SLACK_LOG1P",
@@ -22,15 +22,15 @@
   "march_was_previously_viewed_in_baseline_exploration": true,
   "march_metrics": {
     "MODEL": "Engineered random forest (February-selected threshold)",
-    "THRESHOLD": 0.49879784491634016,
+    "THRESHOLD": 0.4987978449163402,
     "TEST_ROWS": 114706,
     "TEST_POSITIVE_RATE": 0.30222481823095565,
     "ACCURACY": 0.8478981047198926,
     "PRECISION": 0.7586362270952238,
     "RECALL": 0.7285026105518216,
     "F1": 0.7432641229012463,
-    "ROC_AUC": 0.8776678109621174,
-    "PR_AUC_AVERAGE_PRECISION": 0.8272057392979416
+    "ROC_AUC": 0.8776678109621173,
+    "PR_AUC_AVERAGE_PRECISION": 0.8272057392979417
   },
   "outputs": [
     "reports/metrics/day3_model_validation_comparison.csv",

@@ -1,0 +1,18 @@
+{
+  "period": "2026-01_to_2026-04",
+  "carrier": "WN",
+  "missing_tail_numbers": 726,
+  "cancelled_flights": 5969,
+  "diverted_flights": 798,
+  "missing_timestamp_values": 11952,
+  "unknown_airport_timezones": 0,
+  "invalid_turnaround_values": 0,
+  "linked_aircraft_pairs": 423660,
+  "candidate_aircraft_pairs": 438130,
+  "rejected_aircraft_pairs": 14470,
+  "notes": {
+    "missing_timestamp_values": "Sum of unresolved scheduled and actual UTC fields in the flight-level export.",
+    "rejected_aircraft_pairs": "Eligible operated flights not retained as linked aircraft pairs; cancellations, diversions, missing required fields, route breaks, and timing checks are excluded."
+  },
+  "source": "reports/metrics/day2_data_quality.json"
+}

@@ -3,7 +3,7 @@
   "period": "2026-01_to_2026-04",
   "raw_files": [
     {
-      "file": "data/raw/T_ONTIME_REPORTING_20261027_145650/T_ONTIME_REPORTING.csv",
+      "file": "data\\raw\\On_Time_Reporting_Carrier_On_Time_Performance_1987_present_2026_1\\On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2026_1.csv",
       "rows_for_WN": 104002,
       "cancelled_for_WN": 2730,
       "diverted_for_WN": 152,
@@ -12,7 +12,7 @@
       "unparsed_actual_arrivals": 2752
     },
     {
-      "file": "data/raw/T_ONTIME_REPORTING_20261027_145800/T_ONTIME_REPORTING.csv",
+      "file": "data\\raw\\On_Time_Reporting_Carrier_On_Time_Performance_1987_present_2026_2\\On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2026_2.csv",
       "rows_for_WN": 100783,
       "cancelled_for_WN": 1018,
       "diverted_for_WN": 187,
@@ -21,7 +21,7 @@
       "unparsed_actual_arrivals": 1043
     },
     {
-      "file": "data/raw/T_ONTIME_REPORTING_20261027_150025/T_ONTIME_REPORTING.csv",
+      "file": "data\\raw\\On_Time_Reporting_Carrier_On_Time_Performance_1987_present_2026_3\\On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2026_3.csv",
       "rows_for_WN": 122298,
       "cancelled_for_WN": 1911,
       "diverted_for_WN": 285,
@@ -30,7 +30,7 @@
       "unparsed_actual_arrivals": 1953
     },
     {
-      "file": "data/raw/T_ONTIME_REPORTING_20261029_080530/T_ONTIME_REPORTING.csv",
+      "file": "data\\raw\\On_Time_Reporting_Carrier_On_Time_Performance_1987_present_2026_4\\On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2026_4.csv",
       "rows_for_WN": 117814,
       "cancelled_for_WN": 310,
       "diverted_for_WN": 174,
@@ -149,11 +149,11 @@
     "ACTUAL_ARR_UTC": 6093
   },
   "outputs": [
-    "reports/metrics/day2_raw_column_profile.csv",
-    "reports/metrics/day2_raw_descriptive_statistics.csv",
-    "reports/metrics/day2_raw_dataset_profile.json",
+    "reports\\metrics\\day2_raw_column_profile.csv",
+    "reports\\metrics\\day2_raw_descriptive_statistics.csv",
+    "reports\\metrics\\day2_raw_dataset_profile.json",
     "data\\processed\\wn_flights_2026-01_to_2026-04.csv",
     "data\\processed\\wn_aircraft_pairs_2026-01_to_2026-04.csv",
-    "reports/metrics/day2_cancellation_summary.csv"
+    "reports\\metrics\\day2_cancellation_summary.csv"
   ]
 }

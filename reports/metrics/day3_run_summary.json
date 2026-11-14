@@ -35,26 +35,26 @@
       "MODEL": "Balanced logistic regression",
       "TEST_ROWS": 114706,
       "TEST_POSITIVE_RATE": 0.30222481823095565,
-      "ACCURACY": 0.7766899726256691,
-      "PRECISION": 0.6071344032571131,
-      "RECALL": 0.7398678858857126,
-      "F1": 0.6669613719397242,
-      "ROC_AUC": 0.8374298478953535,
-      "PR_AUC_AVERAGE_PRECISION": 0.7066166561999162
+      "ACCURACY": 0.7766812546858927,
+      "PRECISION": 0.6071251035625518,
+      "RECALL": 0.7398390400092307,
+      "F1": 0.6669440399417517,
+      "ROC_AUC": 0.8374302796518724,
+      "PR_AUC_AVERAGE_PRECISION": 0.7066169511102147
     }
   ],
   "outputs": [
-    "reports/figures/delay_distributions.png",
-    "reports/figures/delay_rates_by_schedule_and_origin.png",
-    "reports/figures/propagation_by_inbound_delay_and_slack.png",
-    "reports/metrics/day3_delay_rate_by_hour.csv",
-    "reports/metrics/day3_delay_rate_by_weekday.csv",
-    "reports/metrics/day3_delay_rate_by_origin.csv",
-    "reports/metrics/day3_propagation_by_inbound_delay.csv",
-    "reports/metrics/day3_propagation_by_scheduled_slack.csv",
-    "reports/metrics/day3_baseline_metrics.csv",
-    "reports/metrics/day3_logistic_confusion_matrix.csv",
-    "reports/metrics/day3_delay_quantiles.csv",
-    "reports/metrics/day3_run_summary.json"
+    "reports\\figures\\delay_distributions.png",
+    "reports\\figures\\delay_rates_by_schedule_and_origin.png",
+    "reports\\figures\\propagation_by_inbound_delay_and_slack.png",
+    "reports\\metrics\\day3_delay_rate_by_hour.csv",
+    "reports\\metrics\\day3_delay_rate_by_weekday.csv",
+    "reports\\metrics\\day3_delay_rate_by_origin.csv",
+    "reports\\metrics\\day3_propagation_by_inbound_delay.csv",
+    "reports\\metrics\\day3_propagation_by_scheduled_slack.csv",
+    "reports\\metrics\\day3_baseline_metrics.csv",
+    "reports\\metrics\\day3_logistic_confusion_matrix.csv",
+    "reports\\metrics\\day3_delay_quantiles.csv",
+    "reports\\metrics\\day3_run_summary.json"
   ]
 }

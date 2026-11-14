@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 *.pyc
+.pytest_cache/
 venv/
 .venv/
 
@@ -15,8 +16,12 @@ venv/
 *.log
 
 # Large datasets
-data/raw/
-data/processed/*.csv
+data/raw/**
+!data/raw/README.md
+!data/raw/.gitkeep
+data/processed/**
+!data/processed/.gitkeep
+*.egg-info/
 
 # Original reporting datasets
 T_ONTIME_REPORTING_*/
