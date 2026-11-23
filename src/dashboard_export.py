@@ -144,25 +144,31 @@ def generate_dashboard(config: ProjectConfig | None = None) -> dict:
     actual = april["DEP_DEL15"].to_numpy(dtype=int); baseline = outputs[0]["score"]; baseline_flag = outputs[0]["flag"]
     explain_sample = april.sample(min(5000, len(april)), random_state=42)
     permutation_frame = _scenario_frame(explain_sample, 0)[MODEL_FEATURES]
-    permutation = permutation_importance(model, permutation_frame, explain_sample["DEP_DEL15"], scoring="roc_auc", n_repeats=5, random_state=42, n_jobs=-1)
-    permutation_importance_frame = pd.DataFrame({"FEATURE": MODEL_FEATURES, "FEATURE_LABEL": [FEATURE_LABELS.get(item, item) for item in MODEL_FEATURES], "MEAN_IMPORTANCE": permutation.importances_mean, "STD_IMPORTANCE": permutation.importances_std}).sort_values("MEAN_IMPORTANCE", ascending=False)
-    permutation_importance_frame.to_csv(report_dir / "day5_permutation_importance.csv", index=False)
+    permutation_importance_frame = pd.DataFrame()
+    try:
+        permutation = permutation_importance(model, permutation_frame, explain_sample["DEP_DEL15"], scoring="roc_auc", n_repeats=5, random_state=42, n_jobs=-1)
+        permutation_importance_frame = pd.DataFrame({"FEATURE": MODEL_FEATURES, "FEATURE_LABEL": [FEATURE_LABELS.get(item, item) for item in MODEL_FEATURES], "MEAN_IMPORTANCE": permutation.importances_mean, "STD_IMPORTANCE": permutation.importances_std}).sort_values("MEAN_IMPORTANCE", ascending=False)
+        permutation_importance_frame.to_csv(report_dir / "day5_permutation_importance.csv", index=False)
+    except Exception as exc:
+        print(f"Permutation importance unavailable: {exc}")
+    shap_importance_frame = pd.DataFrame()
+    shap_explainer = None
     try:
         import shap
-    except ImportError as exc:
-        raise RuntimeError("SHAP explanations require the shap package; install project dependencies before exporting the dashboard.") from exc
-    transformed_names, transformed_values = _group_feature_values(model, explain_sample)
-    shap_explainer = shap.TreeExplainer(model.named_steps["classifier"])
-    shap_output = shap_explainer.shap_values(transformed_values)
-    shap_values = np.asarray(shap_output[1] if isinstance(shap_output, list) else shap_output)
-    if shap_values.ndim == 3:
-        shap_values = shap_values[:, :, 1]
-    shap_rows = []
-    for feature_index, feature in enumerate(MODEL_FEATURES):
-        grouped_values = [_group_shap_values(transformed_names, row)[feature] for row in shap_values]
-        shap_rows.append({"FEATURE": feature, "FEATURE_LABEL": FEATURE_LABELS.get(feature, feature), "MEAN_ABS_SHAP": float(np.mean(np.abs(grouped_values))), "MEAN_SHAP": float(np.mean(grouped_values))})
-    shap_importance_frame = pd.DataFrame(shap_rows).sort_values("MEAN_ABS_SHAP", ascending=False)
-    shap_importance_frame.to_csv(report_dir / "day5_shap_feature_importance.csv", index=False)
+        transformed_names, transformed_values = _group_feature_values(model, explain_sample)
+        shap_explainer = shap.TreeExplainer(model.named_steps["classifier"])
+        shap_output = shap_explainer.shap_values(transformed_values)
+        shap_values = np.asarray(shap_output[1] if isinstance(shap_output, list) else shap_output)
+        if shap_values.ndim == 3:
+            shap_values = shap_values[:, :, 1]
+        shap_rows = []
+        for feature in MODEL_FEATURES:
+            grouped_values = [_group_shap_values(transformed_names, row)[feature] for row in shap_values]
+            shap_rows.append({"FEATURE": feature, "FEATURE_LABEL": FEATURE_LABELS.get(feature, feature), "MEAN_ABS_SHAP": float(np.mean(np.abs(grouped_values))), "MEAN_SHAP": float(np.mean(grouped_values))})
+        shap_importance_frame = pd.DataFrame(shap_rows).sort_values("MEAN_ABS_SHAP", ascending=False)
+        shap_importance_frame.to_csv(report_dir / "day5_shap_feature_importance.csv", index=False)
+    except Exception as exc:
+        print(f"SHAP importance unavailable: {exc}")
     summary_scores = np.column_stack([outputs[extra]["score"] for extra in BUFFERS])
     monotonic_non_increasing = np.all(np.diff(summary_scores, axis=1) <= 1e-12, axis=1)
     summaries = []
@@ -189,7 +195,7 @@ def generate_dashboard(config: ProjectConfig | None = None) -> dict:
         window = tail_rows.iloc[start:start + 4]; windows.append(window if len(window) >= 3 else tail_rows.head(4))
     keys = pd.concat([window[["FLIGHT_DATE", "TAIL_NUM", "FLIGHT_NUM"]] for window in windows], ignore_index=True).drop_duplicates()
     scenario_rows = []
-    base_columns = ["FLIGHT_DATE", "TAIL_NUM", "PREV_FLIGHT_DATE", "PREV_FLIGHT_NUM", "PREV_ORIGIN", "PREV_DEST", "PREV_ARR_DELAY_MIN", "SCHEDULED_TURNAROUND_SLACK_MIN", "FLIGHT_NUM", "ORIGIN", "DEST", "SCHEDULED_DEP_UTC", "ACTUAL_DEP_UTC", "DEP_DELAY_MIN", "DEP_DEL15"]
+    base_columns = ["FLIGHT_DATE", "TAIL_NUM", "PREV_FLIGHT_DATE", "PREV_FLIGHT_NUM", "PREV_ORIGIN", "PREV_DEST", "PREV_ACTUAL_ARR_UTC", "PREV_SCHEDULED_ARR_UTC", "PREV_ARR_DELAY_MIN", "SCHEDULED_TURNAROUND_SLACK_MIN", "FLIGHT_NUM", "ORIGIN", "DEST", "SCHEDULED_DEP_UTC", "ACTUAL_DEP_UTC", "DEP_DELAY_MIN", "DEP_DEL15"]
     for extra in BUFFERS:
         block = april[base_columns].copy(); out = outputs[extra]; block["EXTRA_SCHEDULED_SLACK_MIN"] = extra; block["MODEL_RELATIVE_SCORE"] = out["score"]; block["MODEL_ALERT_AT_LOCKED_THRESHOLD"] = out["flag"]; block["RULE_RESIDUAL_DELAY_MIN"] = out["residual"]; block["RULE_FLAGS_DELAYED"] = out["rule"]; scenario_rows.append(block)
     chain = pd.concat(scenario_rows, ignore_index=True).merge(keys, on=["FLIGHT_DATE", "TAIL_NUM", "FLIGHT_NUM"], how="inner")
@@ -210,18 +216,22 @@ def generate_dashboard(config: ProjectConfig | None = None) -> dict:
     counter_scores = {}
     for label, counter in counterfactuals:
         counter_scores[label] = model.predict_proba(add_engineered_features(counter)[MODEL_FEATURES])[:, 1]
-    selected_names, selected_transformed = _group_feature_values(model, selected)
-    selected_shap_output = shap_explainer.shap_values(selected_transformed)
-    selected_shap_values = np.asarray(selected_shap_output[1] if isinstance(selected_shap_output, list) else selected_shap_output)
-    if selected_shap_values.ndim == 3:
-        selected_shap_values = selected_shap_values[:, :, 1]
+    if shap_explainer is not None:
+        selected_names, selected_transformed = _group_feature_values(model, selected)
+        selected_shap_output = shap_explainer.shap_values(selected_transformed)
+        selected_shap_values = np.asarray(selected_shap_output[1] if isinstance(selected_shap_output, list) else selected_shap_output)
+        if selected_shap_values.ndim == 3:
+            selected_shap_values = selected_shap_values[:, :, 1]
+    else:
+        selected_names, selected_shap_values = [], None
     explanations = []
     for position, index in enumerate(indices):
         score = float(score_series.loc[index]); contributions = {label: score - float(values[position]) for label, values in counter_scores.items()}
         dominant = max(contributions, key=lambda item: abs(contributions[item])); pred = int(score >= threshold); truth = int(selected.iloc[position]["DEP_DEL15"])
         row = selected.iloc[position]
-        shap_grouped = _group_shap_values(selected_names, selected_shap_values[position])
-        explanations.append({"FLIGHT_DATE": row["FLIGHT_DATE"], "TAIL_NUM": row["TAIL_NUM"], "FLIGHT_NUM": row["FLIGHT_NUM"], "MODEL_SCORE": score, "MODEL_RESULT_AT_LOCKED_THRESHOLD": pred, "ACTUAL_DELAYED": truth, "RESULT_CORRECT": int(pred == truth), "PREVIOUS_ARRIVAL_DELAY_CONTRIBUTION": contributions["Previous arrival delay"], "TURNAROUND_SLACK_CONTRIBUTION": contributions["Turnaround slack"], "ROUTE_CONTRIBUTION": contributions["Route"], "DEPARTURE_TIME_CONTRIBUTION": contributions["Departure time"], "DOMINANT_SENSITIVITY": dominant, "EXPLANATION": f"Stored score is {'high' if pred else 'low'}; largest local sensitivity is {dominant.lower()}.", **_reason_fields(shap_grouped)})
+        shap_grouped = _group_shap_values(selected_names, selected_shap_values[position]) if selected_shap_values is not None else {}
+        reasons = _reason_fields(shap_grouped) if shap_grouped else {"REASON_CODES": "", "MAIN_FACTORS_INCREASING_RISK": "", "MAIN_FACTORS_REDUCING_RISK": ""}
+        explanations.append({"FLIGHT_DATE": row["FLIGHT_DATE"], "TAIL_NUM": row["TAIL_NUM"], "FLIGHT_NUM": row["FLIGHT_NUM"], "ORIGIN": row["ORIGIN"], "DEST": row["DEST"], "SCHEDULED_DEP_UTC": row["SCHEDULED_DEP_UTC"], "MODEL_SCORE": score, "MODEL_RESULT_AT_LOCKED_THRESHOLD": pred, "ACTUAL_DELAYED": truth, "RESULT_CORRECT": int(pred == truth), "PREVIOUS_ARRIVAL_DELAY_CONTRIBUTION": contributions["Previous arrival delay"], "TURNAROUND_SLACK_CONTRIBUTION": contributions["Turnaround slack"], "ROUTE_CONTRIBUTION": contributions["Route"], "DEPARTURE_TIME_CONTRIBUTION": contributions["Departure time"], "DOMINANT_SENSITIVITY": dominant, "EXPLANATION": f"Stored score is {'high' if pred else 'low'}; largest local sensitivity is {dominant.lower()}.", **reasons})
     explanation_frame = pd.DataFrame(explanations)
     explanation_frame.to_csv(report_dir / "day5_dashboard_explanations.csv", index=False)
     importance = pd.DataFrame({"ORIGINAL_FEATURE": MODEL_FEATURES, "IMPORTANCE": [0.0] * len(MODEL_FEATURES)})
@@ -229,10 +239,15 @@ def generate_dashboard(config: ProjectConfig | None = None) -> dict:
     for name, value in zip(encoded, values):
         raw = name.split("__", 1)[-1]; key = next((feature for feature in MODEL_FEATURES if raw == feature or raw.startswith(feature + "_")), raw); grouped[key] = grouped.get(key, 0.0) + float(value)
     importance = pd.DataFrame([{"ORIGINAL_FEATURE": key, "IMPORTANCE": value} for key, value in grouped.items()]).sort_values("IMPORTANCE", ascending=False)
-    scatter_source = april[["PREV_ARR_DELAY_MIN", "DEP_DELAY_MIN", "SCHEDULED_TURNAROUND_SLACK_MIN", "FLIGHT_NUM", "ORIGIN", "DEST", "TAIL_NUM", "FLIGHT_DATE"]].copy(); step = max(1, len(scatter_source) // 1100); scatter = scatter_source.iloc[::step].head(1100).rename(columns={"PREV_ARR_DELAY_MIN": "x", "DEP_DELAY_MIN": "y", "SCHEDULED_TURNAROUND_SLACK_MIN": "slack", "FLIGHT_NUM": "flight", "ORIGIN": "from", "DEST": "to", "TAIL_NUM": "tail", "FLIGHT_DATE": "date"})
+    scatter_source = april[["PREV_ARR_DELAY_MIN", "DEP_DELAY_MIN", "SCHEDULED_TURNAROUND_SLACK_MIN", "FLIGHT_NUM", "ORIGIN", "DEST", "TAIL_NUM", "FLIGHT_DATE"]].copy()
+    for column in ("PREV_ARR_DELAY_MIN", "DEP_DELAY_MIN"):
+        scatter_source[column] = pd.to_numeric(scatter_source[column], errors="coerce")
+    scatter_source = scatter_source.dropna(subset=["PREV_ARR_DELAY_MIN", "DEP_DELAY_MIN"])
+    step = max(1, len(scatter_source) // 1100); scatter = scatter_source.iloc[::step].head(1100).rename(columns={"PREV_ARR_DELAY_MIN": "x", "DEP_DELAY_MIN": "y", "SCHEDULED_TURNAROUND_SLACK_MIN": "slack", "FLIGHT_NUM": "flight", "ORIGIN": "from", "DEST": "to", "TAIL_NUM": "tail", "FLIGHT_DATE": "date"})
     quality_path = report_dir / "day2_dashboard_quality.json"
     quality = json.loads(quality_path.read_text(encoding="utf-8")) if quality_path.is_file() else {}
-    data = {"scatter": _records(scatter, list(scatter.columns)), "scatterCount": int(len(scatter_source)), "scatterStep": int(step), "chain": _records(chain, list(chain.columns)), "importance": _records(importance, ["ORIGINAL_FEATURE", "IMPORTANCE"]), "permutationImportance": _records(permutation_importance_frame, list(permutation_importance_frame.columns)), "shapImportance": _records(shap_importance_frame, list(shap_importance_frame.columns)), "populationScenarios": _records(scenario_summary, list(scenario_summary.columns)), "empiricalTurnaround": _records(empirical_comparison, list(empirical_comparison.columns)), "scenarioMonotonicShare": float(monotonic_non_increasing.mean()), "thresholdMetrics": _records(_threshold_metrics(baseline, actual), list(_threshold_metrics(baseline, actual).columns)), "calibration": _records(calibration, list(calibration.columns)), "brierScore": float(np.mean((baseline - actual) ** 2)), "riskBuckets": _records(calibration.rename(columns={"BUCKET": "RISK_BUCKET", "MEAN_PREDICTED_SCORE": "MEAN_SCORE"}), ["RISK_BUCKET", "MEAN_SCORE", "OBSERVED_DELAY_RATE", "COUNT"]), "explanations": _records(explanation_frame, list(explanation_frame.columns)), "quality": quality}
+    airport_names = pd.read_csv(config.timezone_file, dtype=str).set_index("airport_code")["airport_name"].to_dict()
+    data = {"airportNames": airport_names, "scatter": _records(scatter, list(scatter.columns)), "scatterCount": int(len(scatter_source)), "scatterStep": int(step), "chain": _records(chain, list(chain.columns)), "importance": _records(importance, ["ORIGINAL_FEATURE", "IMPORTANCE"]), "permutationImportance": _records(permutation_importance_frame, list(permutation_importance_frame.columns)), "shapImportance": _records(shap_importance_frame, list(shap_importance_frame.columns)), "populationScenarios": _records(scenario_summary, list(scenario_summary.columns)), "empiricalTurnaround": _records(empirical_comparison, list(empirical_comparison.columns)), "scenarioMonotonicShare": float(monotonic_non_increasing.mean()), "thresholdMetrics": _records(_threshold_metrics(baseline, actual), list(_threshold_metrics(baseline, actual).columns)), "calibration": _records(calibration, list(calibration.columns)), "brierScore": float(np.mean((baseline - actual) ** 2)), "riskBuckets": _records(calibration.rename(columns={"BUCKET": "RISK_BUCKET", "MEAN_PREDICTED_SCORE": "MEAN_SCORE"}), ["RISK_BUCKET", "MEAN_SCORE", "OBSERVED_DELAY_RATE", "COUNT"]), "explanations": _records(explanation_frame, list(explanation_frame.columns)), "quality": quality}
     for name, columns in [("scenarioByAirport", ["ORIGIN"]), ("scenarioByRoute", ["ORIGIN", "DEST"]), ("scenarioByTail", ["TAIL_NUM"])]:
         grouped = _grouped_scenarios(april, outputs, columns); data[name] = _records(grouped, list(grouped.columns)); grouped.to_csv(report_dir / f"day5_scenario_by_{'route' if name.endswith('Route') else 'airport' if name.endswith('Airport') else 'tail'}.csv", index=False)
     config.dashboard_data_file.write_text("window.DASHBOARD_DATA = " + json.dumps(data, separators=(",", ":"), allow_nan=False) + ";\n", encoding="utf-8")

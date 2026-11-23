@@ -9,6 +9,15 @@
     .filter-block{background:#102234;border:1px solid #263f52;border-radius:8px;padding:16px}.filter-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:12px}.filter-grid label{display:grid;gap:5px;color:#91a9ba;font:8px var(--mono);letter-spacing:.04em}.filter-grid select,.filter-grid input{width:100%;box-sizing:border-box;background:#0b1b29;color:#dbe7ec;border:1px solid #345166;border-radius:4px;padding:8px;font:10px var(--mono)}.filter-grid select{min-height:32px}.filter-grid input{padding:0;accent-color:var(--cyan)}.range-label{grid-column:span 2}.range-label output{float:right;color:var(--cyan)}.filter-status{display:flex;gap:8px;align-items:baseline;border-top:1px solid #263f52;margin-top:13px;padding-top:10px;color:#7892a2;font-size:10px}.filter-status b{color:var(--cyan);font:12px var(--mono)}.reset-filters{align-self:center;background:transparent;color:var(--cyan);border:1px solid #345166;border-radius:4px;padding:7px 10px;font:9px var(--mono);cursor:pointer}.reset-filters:hover{background:#173046}.quality-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.quality-card{background:#102234;border:1px solid #263f52;border-radius:6px;padding:12px}.quality-card b{display:block;color:#e5edf1;font:650 20px var(--display)}.quality-card small{display:block;color:#91a9ba;font:8px var(--mono);letter-spacing:.04em;margin-top:5px}.quality-card span{display:block;color:#70899a;font-size:9px;margin-top:7px}.quality-card.warn{border-color:#725a32}.quality-note{color:#7892a2;font-size:10px;line-height:1.5;margin:10px 0 0}.section-heading{scroll-margin-top:18px}@media(max-width:1000px){.filter-grid{grid-template-columns:repeat(3,1fr)}.quality-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:600px){.filter-grid{grid-template-columns:repeat(2,1fr)}.range-label{grid-column:span 2}.quality-grid{grid-template-columns:repeat(2,1fr)}.filter-block .section-heading{display:block}.reset-filters{margin-top:10px}}
     .explainability-subtitle{border-top:1px solid #263f52;padding-top:9px;margin-top:7px;color:#91a9ba;font:8px var(--mono);letter-spacing:.04em}.reason-code-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.reason-code-grid>div{background:#102234;border:1px solid #263f52;border-radius:5px;padding:9px}.reason-code-grid small{display:block;color:#91a9ba;font:8px var(--mono);margin-bottom:5px}.reason-code-grid b{display:block;color:#dbe7ec;font-size:10px;line-height:1.45}.empirical-turnaround{margin-top:10px}.empirical-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid #263f52;color:#a9bdc8;font:9px var(--mono)}.empirical-row b{color:var(--cyan)}.empirical-row small{color:#71899a}@media(max-width:600px){.reason-code-grid{grid-template-columns:1fr}}
   </style>
+  <style>
+    .intel-grid{grid-template-columns:minmax(0,1fr)}
+    .diagnostic-grid{grid-template-columns:minmax(0,1fr)}
+    .scenario-layout{grid-template-columns:minmax(0,1fr)}
+    .filter-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+    .filter-grid .range-label-wide{grid-column:span 3}
+    @media(max-width:1000px){.filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:600px){.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.filter-grid .range-label-wide{grid-column:span 2}}
+  </style>
 </head>
 <body>
 <aside class="sidebar">
@@ -43,9 +52,8 @@
       <label>Destination<select id="filterDest"><option value="">All destinations</option></select></label>
       <label>Date / month<select id="filterMonth"><option value="">All months</option></select></label>
       <label>Delay severity<select id="filterSeverity"><option value="">All outcomes</option><option value="clear">Under 15 min</option><option value="mild">15–59 min</option><option value="severe">60+ min</option></select></label>
-      <label>Prediction result<select id="filterCorrect"><option value="">Correct + incorrect</option><option value="correct">Correct only</option><option value="incorrect">Incorrect only</option></select></label>
       <label class="range-label">Previous arrival delay <output id="prevRangeValue"></output><input id="prevDelayRange" type="range" min="0" max="1" step="1" value="1"></label>
-      <label class="range-label">Turnaround slack <output id="slackRangeValue"></output><input id="slackRange" type="range" min="0" max="1" step="1" value="1"></label>
+      <label class="range-label range-label-wide">Turnaround slack <output id="slackRangeValue"></output><input id="slackRange" type="range" min="0" max="1" step="1" value="1"></label>
     </div>
     <div class="filter-status"><b id="filterCount">—</b><span id="filterSummary">Loading linked flight pairs</span></div>
   </section>
@@ -79,7 +87,7 @@
   </section>
 
   <section class="section-block combined-intelligence" id="intelligence">
-     <div class="section-heading"><div><div class="section-kicker">03 / FLIGHT OUTCOME + DELAY INTELLIGENCE</div><h2>Selected flight and the signals behind it</h2><p>Compare the stored model result with the actual outcome, then explore April patterns.</p></div></div>
+     <div class="section-heading"><div><div class="section-kicker">03 / FLIGHT OUTCOME + DELAY INTELLIGENCE</div><h2>Selected flight and the signals behind it</h2><p>Compare the stored model result with the actual outcome, then review the model inputs.</p></div></div>
     <div class="selected-section" id="selectedFlight">
     <div class="section-heading compact-heading"><div><div class="section-kicker">SELECTED FLIGHT</div><h2 id="selectedTitle">WN 1577 <span>HOU → ONT</span></h2></div><div class="date-pill" id="flightDate">APR 13, 2026</div></div>
     <div class="detail-grid">
@@ -90,7 +98,6 @@
     </div>
     </div>
     <div class="intel-grid">
-      <article class="panel scatter-panel"><div class="panel-title"><div><h3>Previous arrival vs next departure</h3><p>Each dot is a sampled April flight pair</p></div><span class="chart-tag">APRIL · BTS</span></div><div class="scatter-wrap"><svg id="scatterChart" viewBox="0 0 620 300" role="img" aria-label="Scatter plot of previous arrival delay versus next departure delay"></svg><div id="scatterTooltip" class="chart-tooltip" hidden></div></div><div class="chart-foot"><span>PREVIOUS ARRIVAL DELAY · MIN</span><span>NEXT DEPARTURE DELAY · MIN</span></div><p class="chart-note" id="scatterNote">Systematic sample from the April evaluation data. Axes limited to −30 to 180 minutes for readability; hover a dot for its flight details.</p></article>
       <article class="panel importance-panel"><div class="panel-title"><div><h3>Global model explainability</h3><p>Impurity, permutation, and SHAP views</p></div><span class="chart-tag">MODEL INPUTS</span></div><div id="importanceChart" class="importance-chart"></div><div id="permutationChart" class="importance-chart"></div><button class="expand-features" id="featureToggle" type="button" aria-expanded="false">Show remaining features</button></article>
     </div>
   </section>
@@ -99,7 +106,6 @@
     <div class="section-heading"><div><div class="section-kicker">04 / FEATURE SENSITIVITY ANALYSIS</div><h2>How does added scheduled slack affect model score?</h2><p>Compare hypothetical model scores when only the turnaround-slack feature is increased.</p></div></div>
     <div class="scenario-layout">
       <article class="panel scenario-panel"><div class="panel-title"><div><h3>For the selected flight</h3></div><span class="chart-tag">STORED OUTPUT</span></div><div class="scenario-options" id="scenarioOptions"></div><div class="scenario-detail" id="scenarioDetail"></div><div class="score-comparison" id="scenarioChart" aria-label="Scenario relative score comparison"></div><p class="disclaimer">Illustrative feature-only what-if. Not a causal estimate or schedule recommendation.</p></article>
-      <aside class="panel population-panel"><div class="section-kicker">APRIL POPULATION</div><h3>Across all evaluated flights</h3><p>Hypothetical model score sensitivity, not an operational simulation.</p><div id="populationScenario"></div><div id="scenarioMonotonicNote" class="calibration-note"></div><div id="empiricalTurnaround" class="empirical-turnaround"></div><div class="calibration-note">This analysis changes scheduled turnaround slack only; it does not alter actual departure time, crew, gates, weather, aircraft availability, or downstream flights.</div></aside>
     </div>
   </section>
 
@@ -116,9 +122,7 @@
   </section>
     <div class="diagnostic-grid">
       <article class="panel threshold-panel"><div class="panel-title"><div><h3>Threshold sensitivity</h3><p>Change the decision cutoff applied to stored model scores.</p></div><span class="chart-tag">APRIL HOLDOUT</span></div><label class="threshold-control">Decision threshold <output id="thresholdValue">0.50</output><input id="thresholdSlider" type="range" min="0.05" max="0.95" step="0.05" value="0.50"></label><div id="thresholdMetrics" class="threshold-metrics"></div><div class="pr-chart-title">Precision / recall tradeoff</div><div id="prChart" class="pr-chart"></div><div class="matrix-title"><b>Threshold confusion matrix</b><span id="thresholdMatrixLabel">Threshold 0.50</span></div><div id="thresholdMatrix" class="matrix-grid"></div></article>
-      <article class="panel calibration-panel"><div class="panel-title"><div><h3>Calibration and predicted-risk buckets</h3><p>Observed delay rate compared with the stored score.</p></div><span class="chart-tag">Brier <b id="brierScore">—</b></span></div><div id="calibrationChart" class="calibration-chart"></div><div id="riskBuckets" class="risk-buckets"></div></article>
     </div>
-    <article class="panel explanation-panel"><div class="panel-title"><div><h3>Selected-flight explanation</h3><p>SHAP reason codes show which stored inputs push the model score up or down.</p></div><span class="chart-tag">SHAP + SENSITIVITY</span></div><div id="flightExplanation" class="flight-explanation"></div></article>
 
   <footer><span>FLIGHT DOMINO · ACADEMIC MACHINE LEARNING PROTOTYPE</span><span>BTS ON-TIME PERFORMANCE · JAN–MAR TRAINING · APRIL EVALUATION · RANDOM FOREST</span><a href="../reports/analysis/project_report_draft.md">View Project Report ↗</a></footer>
 </main>

@@ -3,8 +3,8 @@
   if (!DATA) return;
 
   const tailKey = row => String(row.TAIL_NUM ?? '').trim();
-  const allFlights = DATA.chain.filter(row => Number(row.EXTRA_SCHEDULED_SLACK_MIN) === 0);
-  const scenarioRows = DATA.chain;
+  const allFlights = (Array.isArray(DATA.chain) ? DATA.chain : []).filter(row => Number(row.EXTRA_SCHEDULED_SLACK_MIN) === 0);
+  const scenarioRows = Array.isArray(DATA.chain) ? DATA.chain : [];
   const quality = DATA.quality || {
     missing_tail_numbers: 726,
     cancelled_flights: 5969,
@@ -23,8 +23,8 @@
     'M452 187 Q300 245 150 151'
   ];
   const planePositions = [[310, 115], [548, 155], [544, 219], [300, 205]];
-  const airports = ['LAS', 'DAL', 'TPA', 'HOU', 'ONT'];
-  const airportNames = { LAS: 'Las Vegas', DAL: 'Dallas', TPA: 'Tampa', HOU: 'Houston', ONT: 'Ontario' };
+  const airportNames = DATA.airportNames || {};
+  const airportLabel = code => airportNames[code] ? `${airportNames[code]} (${code})` : code;
   const tails = [...new Set(allFlights.map(tailKey).filter(Boolean))].sort();
   let selectedTail = tails[0] || '';
   let filteredFlights = allFlights.slice();
@@ -57,7 +57,7 @@
   })[key] || key.replaceAll('_', ' ').toLowerCase();
   const currentPrediction = row => Number(row.MODEL_RELATIVE_SCORE) >= selectedThreshold;
 
-  const numeric = value => Number.isFinite(Number(value)) ? Number(value) : null;
+  const numeric = value => value == null || value === '' || !Number.isFinite(Number(value)) ? null : Number(value);
   const rangeText = (value, suffix = ' min') => value == null ? '—' : `${Math.round(value)}${suffix}`;
 
   function renderQuality() {
@@ -65,7 +65,7 @@
       ['Missing tail numbers', quality.missing_tail_numbers, 'raw WN flight rows', true],
       ['Cancelled flights', quality.cancelled_flights, 'kept in flight-level data', true],
       ['Diverted flights', quality.diverted_flights, 'kept as disruption barriers', true],
-      ['Missing timestamps', quality.missing_timestamps, 'unresolved UTC fields', true],
+      ['Missing timestamps', quality.missing_timestamp_values ?? quality.missing_timestamps, 'unresolved UTC fields', true],
       ['Unknown airport timezones', quality.unknown_airport_timezones, 'airport mappings unresolved', false],
       ['Invalid turnaround values', quality.invalid_turnaround_values, 'candidate pairs outside 0–24 h', true],
       ['Linked aircraft pairs', quality.linked_aircraft_pairs, 'tail + airport handoffs accepted', false],
@@ -78,7 +78,7 @@
   function setupFilters() {
     const unique = key => [...new Set(allFlights.map(row => String(row[key] ?? '').trim()).filter(Boolean))].sort();
     const options = (id, values, label = value => value) => { el(id).insertAdjacentHTML('beforeend', values.map(value => `<option value="${value}">${label(value)}</option>`).join('')); };
-    options('filterTail', unique('TAIL_NUM')); options('filterOrigin', unique('ORIGIN')); options('filterDest', unique('DEST'));
+    options('filterTail', unique('TAIL_NUM')); options('filterOrigin', unique('ORIGIN'), airportLabel); options('filterDest', unique('DEST'), airportLabel);
     const months = [...new Set(allFlights.map(row => String(row.FLIGHT_DATE || '').slice(0, 7)).filter(Boolean))].sort();
     const dates = [...new Set(allFlights.map(row => String(row.FLIGHT_DATE || '').slice(0, 10)).filter(Boolean))].sort();
     options('filterMonth', [...months, ...dates], value => value.length === 7 ? value.replace('-', ' / ') : `Date · ${value}`);
@@ -86,14 +86,13 @@
     const configureRange = (id, list) => { const input = el(id); input.min = Math.floor(Math.min(...list)); input.max = Math.ceil(Math.max(...list)); input.value = input.max; return input; };
     configureRange('prevDelayRange', values('PREV_ARR_DELAY_MIN')); configureRange('slackRange', values('SCHEDULED_TURNAROUND_SLACK_MIN'));
     const apply = () => {
-      const severity = el('filterSeverity').value; const correct = el('filterCorrect').value;
+      const severity = el('filterSeverity').value;
       const prevMax = Number(el('prevDelayRange').value); const slackMax = Number(el('slackRange').value);
       filteredFlights = allFlights.filter(row => {
-        const delay = numeric(row.DEP_DELAY_MIN) ?? 0; const prev = numeric(row.PREV_ARR_DELAY_MIN); const slack = numeric(row.SCHEDULED_TURNAROUND_SLACK_MIN); const actual = Number(row.DEP_DEL15) === 1; const predicted = currentPrediction(row);
+        const delay = numeric(row.DEP_DELAY_MIN) ?? 0; const prev = numeric(row.PREV_ARR_DELAY_MIN); const slack = numeric(row.SCHEDULED_TURNAROUND_SLACK_MIN);
         const matchesSeverity = !severity || (severity === 'clear' && delay < 15) || (severity === 'mild' && delay >= 15 && delay < 60) || (severity === 'severe' && delay >= 60);
-        const matchesCorrect = !correct || (correct === 'correct' ? predicted === actual : predicted !== actual);
         const period = el('filterMonth').value; const matchesPeriod = !period || (period.length === 7 ? String(row.FLIGHT_DATE).slice(0, 7) === period : String(row.FLIGHT_DATE).slice(0, 10) === period);
-        return (!el('filterTail').value || tailKey(row) === el('filterTail').value) && (!el('filterOrigin').value || row.ORIGIN === el('filterOrigin').value) && (!el('filterDest').value || row.DEST === el('filterDest').value) && matchesPeriod && matchesSeverity && matchesCorrect && prev != null && prev <= prevMax && slack != null && slack <= slackMax;
+        return (!el('filterTail').value || tailKey(row) === el('filterTail').value) && (!el('filterOrigin').value || row.ORIGIN === el('filterOrigin').value) && (!el('filterDest').value || row.DEST === el('filterDest').value) && matchesPeriod && matchesSeverity && prev != null && prev <= prevMax && slack != null && slack <= slackMax;
       });
       const availableTails = [...new Set(filteredFlights.map(tailKey).filter(Boolean))].sort();
       if (!availableTails.includes(selectedTail)) selectedTail = availableTails[0] || '';
@@ -102,9 +101,9 @@
       el('filterCount').textContent = filteredFlights.length.toLocaleString(); el('filterSummary').textContent = `linked flight pairs match the current filters · ${availableTails.length.toLocaleString()} tails`;
       el('prevRangeValue').textContent = `${rangeText(Number(el('prevDelayRange').min))}–${rangeText(prevMax)}`; el('slackRangeValue').textContent = `${rangeText(Number(el('slackRange').min))}–${rangeText(slackMax)}`; renderFlight();
     };
-    ['filterTail','filterOrigin','filterDest','filterMonth','filterSeverity','filterCorrect','prevDelayRange','slackRange'].forEach(id => el(id).addEventListener('input', apply));
+    ['filterTail','filterOrigin','filterDest','filterMonth','filterSeverity','prevDelayRange','slackRange'].forEach(id => el(id).addEventListener('input', apply));
     el('tailSelector').addEventListener('change', () => { el('filterTail').value = el('tailSelector').value; apply(); });
-    el('resetFilters').addEventListener('click', () => { ['filterTail','filterOrigin','filterDest','filterMonth','filterSeverity','filterCorrect'].forEach(id => { el(id).value = ''; }); el('prevDelayRange').value = el('prevDelayRange').max; el('slackRange').value = el('slackRange').max; apply(); }); apply();
+    el('resetFilters').addEventListener('click', () => { ['filterTail','filterOrigin','filterDest','filterMonth','filterSeverity'].forEach(id => { el(id).value = ''; }); el('prevDelayRange').value = el('prevDelayRange').max; el('slackRange').value = el('slackRange').max; apply(); }); apply();
   }
 
   function setupTailSelector() {
@@ -112,14 +111,8 @@
     el('tailSelector').innerHTML = tails.map(tail => `<option value="${tail}">${tail} · ${allFlights.filter(row => tailKey(row) === tail).length} linked legs</option>`).join('');
     el('chainTail').textContent = selectedTail || 'Aircraft chain';
      // Only chains with stored per-flight model results and what-if outputs are offered here.
-    el('tailSelector').addEventListener('change', () => {
-      selectedTail = el('tailSelector').value;
-      flights = allFlights.filter(row => tailKey(row) === selectedTail);
-      selectedFlight = Math.max(0, flights.length - 1);
-      selectedScenario = 0;
-      el('chainTail').textContent = selectedTail || 'Aircraft chain';
-      renderFlight();
-    });
+    // Selection is handled by setupFilters so filter controls and the demo
+    // selector always operate on the same filtered flight list.
   }
 
   function renderBoard() {
@@ -145,7 +138,7 @@
       return `<article class="all-flight-card ${index === selectedFlight ? 'selected' : ''}">
         <div class="all-flight-card-head"><span>LEG 0${index + 1}</span><b>WN ${flight.FLIGHT_NUM}</b><span>${flight.FLIGHT_DATE}</span></div>
         <h3>${flight.ORIGIN} → ${flight.DEST}</h3>
-        <div class="all-flight-stats"><span><small>INBOUND DELAY</small><b>${minuteText(flight.PREV_ARR_DELAY_MIN)} min</b></span><span><small>TURNAROUND</small><b>${Math.round(Number(flight.SCHEDULED_TURNAROUND_SLACK_MIN))} min</b></span><span><small>ACTUAL DEPARTURE</small><b>${actualDelay > 0 ? `+${Math.round(actualDelay)} min late` : actualDelay < 0 ? `${Math.abs(Math.round(actualDelay))} min early` : 'On time'}</b></span><span><small>MODEL</small><b>${predicted ? '15+ min delay' : 'Under 15 min'}</b></span></div>
+        <div class="all-flight-stats"><span><small>PREVIOUS ARRIVAL</small><b>${timeText(flight.PREV_ACTUAL_ARR_UTC)}</b></span><span><small>SCHEDULED DEPARTURE</small><b>${timeText(flight.SCHEDULED_DEP_UTC)}</b></span><span><small>INBOUND DELAY / TURN</small><b>${minuteText(flight.PREV_ARR_DELAY_MIN)} / ${Math.round(Number(flight.SCHEDULED_TURNAROUND_SLACK_MIN))} min</b></span><span><small>ACTUAL DEPARTURE</small><b>${timeText(flight.ACTUAL_DEP_UTC)} · ${actualDelay > 0 ? `+${Math.round(actualDelay)} late` : actualDelay < 0 ? `${Math.abs(Math.round(actualDelay))} early` : 'on time'}</b></span></div>
         <p>${delayed ? 'Actual outcome: 15+ min late' : 'Actual outcome: under 15 min'} · Relative score ${Number(flight.MODEL_RELATIVE_SCORE).toFixed(3)}</p>
       </article>`;
     }).join('');
@@ -162,7 +155,8 @@
 
   function renderMap() {
     const layer = el('dynamicMapLayer');
-    if (!layer || !flights.length) return;
+    if (!layer) return;
+    if (!flights.length) { layer.innerHTML = ''; el('chainProgress').textContent = 'NO LEGS'; return; }
 
     // The original map used a fixed five-airport demo route. Hide those legacy
     // nodes and redraw the selected tail's actual chain on every render.
@@ -207,6 +201,9 @@
       el('chainTail').textContent = selectedTail || 'No matching aircraft';
       el('selectedTitle').textContent = 'No matching flight pair';
       el('flightDate').textContent = 'ADJUST FILTERS';
+      el('scenarioOptions').innerHTML = '<span class="muted">No stored feature-only scenarios are available for this flight.</span>';
+      el('scenarioDetail').textContent = '';
+      el('scenarioChart').textContent = '';
       return;
     }
     const predicted = currentPrediction(row);
@@ -223,7 +220,7 @@
     el('flightDate').textContent = new Date(`${row.FLIGHT_DATE}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).toUpperCase();
     el('prevRoute').textContent = `WN ${String(row.PREV_FLIGHT_NUM).replace(/\.0$/, '')} · ${row.PREV_ORIGIN} → ${row.PREV_DEST}`;
     el('prevDelay').innerHTML = `${minuteText(previousDelay)} <small>min</small>`;
-    el('prevFlightTime').textContent = 'exact arrival times not in saved model output';
+    el('prevFlightTime').textContent = `Scheduled ${timeText(row.PREV_SCHEDULED_ARR_UTC)} · actual ${timeText(row.PREV_ACTUAL_ARR_UTC)}`;
     el('turnLocation').textContent = `${row.ORIGIN} · ${airportNames[row.ORIGIN] || 'turnaround airport'}`;
     el('turnSlack').innerHTML = `${Math.round(slack)} <small>min</small>`;
     el('turnMeter').style.width = `${Math.max(4, Math.min(100, slack / 3.6))}%`;
@@ -241,17 +238,18 @@
     el('modelScore').textContent = score.toFixed(3);
     el('scoreMeter').style.width = `${Math.round(score * 100)}%`;
     renderScenarios(row);
-    renderExplanation(row);
   }
 
   function scenariosForFlight(row) {
-    return scenarioRows.filter(item => tailKey(item) === tailKey(row) && String(item.FLIGHT_NUM).replace(/\.0$/, '') === String(row.FLIGHT_NUM).replace(/\.0$/, '') && item.FLIGHT_DATE === row.FLIGHT_DATE)
-      .sort((a, b) => Number(a.EXTRA_SCHEDULED_SLACK_MIN) - Number(b.EXTRA_SCHEDULED_SLACK_MIN));
+    const matches = scenarioRows.filter(item => tailKey(item) === tailKey(row) && String(item.FLIGHT_NUM).replace(/\.0$/, '') === String(row.FLIGHT_NUM).replace(/\.0$/, '') && item.FLIGHT_DATE === row.FLIGHT_DATE && item.ORIGIN === row.ORIGIN && item.DEST === row.DEST && item.SCHEDULED_DEP_UTC === row.SCHEDULED_DEP_UTC);
+    const byBuffer = new Map(matches.map(item => [Number(item.EXTRA_SCHEDULED_SLACK_MIN), item]));
+    return [0, 5, 10, 15, 20, 30, 45, 60].map(buffer => byBuffer.get(buffer)).filter(Boolean);
   }
   function renderScenarios(row) {
     const scenarios = scenariosForFlight(row);
     const chosen = scenarios[selectedScenario] || scenarios[0];
-    if (!chosen) return;
+    if (!chosen) { el('scenarioOptions').innerHTML = '<span class="muted">No stored feature-only scenarios are available for this flight.</span>'; el('scenarioDetail').textContent = ''; el('scenarioChart').textContent = ''; return; }
+    selectedScenario = Math.min(selectedScenario, scenarios.length - 1);
     el('scenarioOptions').innerHTML = scenarios.map((item, i) => `<button class="scenario-choice ${i === selectedScenario ? 'active' : ''}" data-scenario="${i}" aria-pressed="${i === selectedScenario}"><small>${Number(item.EXTRA_SCHEDULED_SLACK_MIN) === 0 ? 'ORIGINAL' : 'EXTRA SLACK'}</small><b>+${item.EXTRA_SCHEDULED_SLACK_MIN} min</b></button>`).join('');
     el('scenarioOptions').querySelectorAll('.scenario-choice').forEach(button => button.addEventListener('click', () => {
       selectedScenario = Number(button.dataset.scenario);
@@ -259,8 +257,8 @@
     }));
     const extra = Number(chosen.EXTRA_SCHEDULED_SLACK_MIN);
     const score = Number(chosen.MODEL_RELATIVE_SCORE);
-    const alert = Number(chosen.MODEL_RELATIVE_SCORE) >= selectedThreshold;
-    const changed = alert !== (Number(scenarios[0].MODEL_RELATIVE_SCORE) >= selectedThreshold);
+    const alert = Number(chosen.MODEL_ALERT_AT_LOCKED_THRESHOLD) === 1;
+    const changed = alert !== (Number(scenarios[0].MODEL_ALERT_AT_LOCKED_THRESHOLD) === 1);
     el('scenarioDetail').innerHTML = `<div><small>TURNAROUND IN THIS WHAT-IF</small><b>${Math.round(Number(row.SCHEDULED_TURNAROUND_SLACK_MIN))} <i>→</i> ${Math.round(Number(row.SCHEDULED_TURNAROUND_SLACK_MIN) + extra)} min</b><span>Original <i>→</i> hypothetical</span></div><div><small>RELATIVE MODEL SCORE</small><b>${score.toFixed(3)}</b><span>${alert ? 'Stored result flags 15+ min delay' : 'Stored result flags under 15 min'}</span></div><div class="scenario-change ${changed ? 'changed' : ''}"><small>STORED RESULT CHANGE</small><b>${changed ? 'Changed' : 'No change'}</b><span>Compared with original schedule</span></div>`;
     el('scenarioChart').innerHTML = scenarios.map(item => {
       const value = Number(item.MODEL_RELATIVE_SCORE);
@@ -274,22 +272,9 @@
     }));
   }
 
-  function renderPopulationScenarios() {
-    const entries = DATA.populationScenarios;
-    el('populationScenario').innerHTML = entries.map(item => {
-      const minutes = Number(item.EXTRA_SCHEDULED_SLACK_MIN);
-      const score = Number(item.MEAN_MODEL_SCORE);
-      return `<div class="population-row"><span>+${minutes} min</span><div class="population-bar"><i style="width:${score * 100}%"></i></div><b>${score.toFixed(3)}</b></div>`;
-    }).join('');
-    el('populationScenario').insertAdjacentHTML('afterend', '<div class="population-caption">Mean score across April records, using stored feature-only scenario outputs.</div>');
-    const monotonic = Number(DATA.scenarioMonotonicShare);
-    el('scenarioMonotonicNote').textContent = Number.isFinite(monotonic) ? `${(monotonic * 100).toFixed(1)}% of April flights have non-increasing scores across the full slack range; this is a sensitivity result, not a guarantee.` : 'Monotonicity is reported after the next dashboard data regeneration.';
-    const empirical = DATA.empiricalTurnaround || [];
-    el('empiricalTurnaround').innerHTML = empirical.length ? `<div class="explainability-subtitle">Historical comparison by scheduled slack</div>${empirical.map(item => `<div class="empirical-row"><span>${item.TURNAROUND_SLACK_BAND} min</span><b>${(Number(item.EMPIRICAL_DELAY_RATE) * 100).toFixed(1)}%</b><small>${Number(item.FLIGHT_COUNT).toLocaleString()} flights</small></div>`).join('')}` : '';
-  }
-
   function renderImportance() {
-    const items = DATA.importance;
+    const items = DATA.importance || [];
+    if (!items.length) { el('importanceChart').innerHTML = '<span class="muted">Impurity importance is unavailable.</span>'; return; }
     el('importanceChart').innerHTML = items.map((item, index) => {
       const value = Number(item.IMPORTANCE);
       const primary = ['PREV_ARR_DELAY_LOG1P', 'PREV_DELAY_X_SHORT_SLACK', 'SCHEDULED_SLACK_LOG1P'].includes(item.ORIGINAL_FEATURE);
@@ -307,60 +292,23 @@
     const permutation = DATA.permutationImportance || [];
     const shap = DATA.shapImportance || [];
     const rows = permutation.slice(0, 6);
-    el('permutationChart').innerHTML = `<div class="explainability-subtitle">Permutation importance · ROC-AUC drop</div>${rows.length ? rows.map(item => `<div class="importance-row"><div class="importance-label"><span>${item.FEATURE_LABEL || item.FEATURE}</span><b>${Number(item.MEAN_IMPORTANCE).toFixed(4)}</b></div><div class="importance-track"><i class="primary-feature" style="width:${Math.min(100, Math.max(2, Number(item.MEAN_IMPORTANCE) * 900))}%"></i></div></div>`).join('') : '<span class="muted">Permutation and SHAP exports will appear after the next dashboard data regeneration.</span>'}`;
+    el('permutationChart').innerHTML = `<div class="explainability-subtitle">Permutation importance · ROC-AUC drop</div>${rows.length ? rows.map(item => `<div class="importance-row"><div class="importance-label"><span>${item.FEATURE_LABEL || item.FEATURE}</span><b>${Number(item.MEAN_IMPORTANCE).toFixed(4)}</b></div><div class="importance-track"><i class="primary-feature" style="width:${Math.min(100, Math.max(2, Number(item.MEAN_IMPORTANCE) * 900))}%"></i></div></div>`).join('') : '<span class="muted">Permutation importance unavailable.</span>'}`;
     if (shap.length) el('permutationChart').insertAdjacentHTML('beforeend', `<div class="explainability-subtitle">Mean absolute SHAP contribution</div>${shap.slice(0, 5).map(item => `<div class="importance-row"><div class="importance-label"><span>${item.FEATURE_LABEL || item.FEATURE}</span><b>${Number(item.MEAN_ABS_SHAP).toFixed(4)}</b></div><div class="importance-track"><i style="width:${Math.min(100, Math.max(2, Number(item.MEAN_ABS_SHAP) * 150))}%"></i></div></div>`).join('')}`);
   }
 
-  function renderScatter() {
-    const svg = el('scatterChart');
-    const W = 620, H = 300, left = 54, right = 18, top = 16, bottom = 42;
-    const xMin = -30, xMax = 180, yMin = -30, yMax = 180;
-    const x = value => left + (Math.max(xMin, Math.min(xMax, value)) - xMin) / (xMax - xMin) * (W - left - right);
-    const y = value => H - bottom - (Math.max(yMin, Math.min(yMax, value)) - yMin) / (yMax - yMin) * (H - top - bottom);
-    const ticks = [-30, 0, 60, 120, 180];
-    let markup = '';
-    ticks.forEach(tick => {
-      markup += `<line class="chart-grid" x1="${left}" y1="${y(tick)}" x2="${W - right}" y2="${y(tick)}"/><line class="chart-grid vertical" x1="${x(tick)}" y1="${top}" x2="${x(tick)}" y2="${H - bottom}"/><text class="axis-tick" x="${left - 9}" y="${y(tick) + 4}" text-anchor="end">${tick}</text><text class="axis-tick" x="${x(tick)}" y="${H - 20}" text-anchor="middle">${tick}</text>`;
-    });
-    markup += `<line class="zero-line" x1="${left}" y1="${y(0)}" x2="${W-right}" y2="${y(0)}"/><line class="zero-line" x1="${x(0)}" y1="${top}" x2="${x(0)}" y2="${H-bottom}"/>`;
-    DATA.scatter.forEach((point, i) => {
-      markup += `<circle class="scatter-dot" data-point="${i}" cx="${x(point.x)}" cy="${y(point.y)}" r="2.8"/>`;
-    });
-    markup += `<text class="axis-label" x="${(left + W-right)/2}" y="${H-2}" text-anchor="middle">PREVIOUS ARRIVAL DELAY · MINUTES</text><text class="axis-label" transform="translate(13 ${(top+H-bottom)/2}) rotate(-90)" text-anchor="middle">NEXT DEPARTURE DELAY · MINUTES</text>`;
-    svg.innerHTML = markup;
-    const tooltip = el('scatterTooltip');
-    svg.querySelectorAll('.scatter-dot').forEach(dot => {
-      const point = DATA.scatter[Number(dot.dataset.point)];
-      const show = event => {
-        const box = svg.getBoundingClientRect();
-        const px = (event.clientX - box.left) / box.width * 100;
-        const py = (event.clientY - box.top) / box.height * 100;
-        tooltip.hidden = false;
-        tooltip.style.left = `${Math.min(78, Math.max(2, px))}%`;
-        tooltip.style.top = `${Math.min(72, Math.max(2, py))}%`;
-        tooltip.innerHTML = `<b>WN ${point.flight} · ${point.from} → ${point.to}</b><span>Previous arrival: ${minuteText(point.x)} min · next departure: ${minuteText(point.y)} min</span><span>Turnaround: ${Math.round(point.slack)} min · ${point.date}</span>`;
-      };
-      dot.addEventListener('pointerenter', show);
-      dot.addEventListener('pointermove', show);
-      dot.addEventListener('pointerleave', () => { tooltip.hidden = true; });
-      dot.addEventListener('focus', () => { tooltip.hidden = false; });
-    });
-    el('scatterNote').textContent = `Showing ${DATA.scatter.length.toLocaleString()} systematically sampled points from ${DATA.scatterCount.toLocaleString()} April flight pairs. Values beyond −30 to 180 min are clipped at the chart edge.`;
-  }
-
   function thresholdRow() {
-    return DATA.thresholdMetrics.reduce((closest, row) => Math.abs(Number(row.THRESHOLD) - selectedThreshold) < Math.abs(Number(closest.THRESHOLD) - selectedThreshold) ? row : closest, DATA.thresholdMetrics[0]);
-  }
-
-  function renderExplanation(row) {
-    const match = (DATA.explanations || []).find(item => tailKey(item) === tailKey(row) && String(item.FLIGHT_NUM).replace(/\.0$/, '') === String(row.FLIGHT_NUM).replace(/\.0$/, '') && item.FLIGHT_DATE === row.FLIGHT_DATE);
-    if (!match) { el('flightExplanation').innerHTML = '<span class="muted">No offline explanation was exported for this flight.</span>'; return; }
-    const items = [['Previous arrival delay', match.PREVIOUS_ARRIVAL_DELAY_CONTRIBUTION], ['Turnaround slack', match.TURNAROUND_SLACK_CONTRIBUTION], ['Route', match.ROUTE_CONTRIBUTION], ['Departure time', match.DEPARTURE_TIME_CONTRIBUTION]];
-    el('flightExplanation').innerHTML = `<div class="explanation-summary"><b>${match.EXPLANATION}</b><span>${Number(match.RESULT_CORRECT) ? 'Stored result matches the historical outcome.' : 'Stored result differs from the historical outcome.'}</span></div><div class="reason-code-grid"><div><small>MAIN FACTORS INCREASING RISK</small><b>${match.MAIN_FACTORS_INCREASING_RISK || 'Available after SHAP export'}</b></div><div><small>MAIN FACTORS REDUCING RISK</small><b>${match.MAIN_FACTORS_REDUCING_RISK || 'Available after SHAP export'}</b></div></div><div class="explanation-bars">${items.map(([label, value]) => `<div class="explanation-row"><span>${label}</span><div><i class="${Number(value) >= 0 ? 'positive' : 'negative'}" style="width:${Math.min(100, Math.max(4, Math.abs(Number(value)) * 180))}%"></i></div><b>${Number(value) >= 0 ? '+' : ''}${Number(value).toFixed(3)}</b></div>`).join('')}</div><small>SHAP values are local model explanations; they are not causal effects.</small>`;
+    const rows = Array.isArray(DATA.thresholdMetrics) ? DATA.thresholdMetrics : [];
+    return rows.length ? rows.reduce((closest, row) => Math.abs(Number(row.THRESHOLD) - selectedThreshold) < Math.abs(Number(closest.THRESHOLD) - selectedThreshold) ? row : closest, rows[0]) : null;
   }
 
   function renderThresholdDiagnostics() {
     const row = thresholdRow();
+    if (!row) {
+      el('thresholdMetrics').innerHTML = '<span class="muted">Threshold metrics are unavailable in this dashboard export.</span>';
+      el('thresholdMatrix').innerHTML = '';
+      el('prChart').innerHTML = '';
+      return;
+    }
     const threshold = Number(row.THRESHOLD);
     el('thresholdValue').value = threshold.toFixed(2);
     el('thresholdSlider').value = threshold.toFixed(2);
@@ -368,9 +316,6 @@
     el('thresholdMatrixLabel').textContent = `Threshold ${threshold.toFixed(2)}`;
     el('thresholdMatrix').innerHTML = `<div class="matrix-corner"></div><div class="matrix-col">Under 15 min</div><div class="matrix-col">15+ min</div><div class="matrix-row">Under 15 min</div><div class="matrix-cell tn"><b>${Number(row.TN).toLocaleString()}</b></div><div class="matrix-cell fp"><b>${Number(row.FP).toLocaleString()}</b></div><div class="matrix-row">15+ min</div><div class="matrix-cell fn"><b>${Number(row.FN).toLocaleString()}</b></div><div class="matrix-cell tp"><b>${Number(row.TP).toLocaleString()}</b></div>`;
     el('prChart').innerHTML = DATA.thresholdMetrics.map(item => `<div class="pr-row ${Number(item.THRESHOLD) === threshold ? 'active' : ''}"><span>${Number(item.THRESHOLD).toFixed(2)}</span><i style="width:${Number(item.PRECISION) * 100}%"></i><b>${(Number(item.PRECISION) * 100).toFixed(0)}%</b><i class="recall" style="width:${Number(item.RECALL) * 100}%"></i><b>${(Number(item.RECALL) * 100).toFixed(0)}%</b></div>`).join('');
-    el('brierScore').textContent = Number(DATA.brierScore).toFixed(3);
-    el('calibrationChart').innerHTML = (DATA.calibration || []).map(item => `<div class="calibration-row"><span>${item.BUCKET}</span><div><i style="width:${Number(item.MEAN_PREDICTED_SCORE) * 100}%"></i><b style="left:${Number(item.OBSERVED_DELAY_RATE) * 100}%"></b></div><small>${(Number(item.OBSERVED_DELAY_RATE) * 100).toFixed(1)}%</small></div>`).join('');
-    el('riskBuckets').innerHTML = (DATA.riskBuckets || []).map(item => `<span>${item.RISK_BUCKET}: ${Number(item.COUNT).toLocaleString()}</span>`).join('');
   }
 
   function setupThresholdControl() {
@@ -396,8 +341,6 @@
   renderImportance();
   renderPermutationAndShap();
   renderThresholdDiagnostics();
-  renderPopulationScenarios();
-  renderScatter();
   renderFlight();
   setupNavigation();
 })();
